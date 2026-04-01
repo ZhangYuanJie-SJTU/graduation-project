@@ -6,7 +6,17 @@
 
 **作者**：张元杰 | **院校**：武汉理工大学 | **指导老师**：刘老师 | **日期**：2026年4月
 
-## 在线预览
+## ⭐ 最终版本
+
+| 文件 | 说明 | 链接 |
+|---|---|---|
+| 介绍解读-final.html | 项目介绍与解读（最终版） | [在线预览](https://zhangyuanjie-sjtu.github.io/graduation-project/final/介绍解读-final.html) |
+| 技术展示-final.html | 技术方案展示（最终版） | [在线预览](https://zhangyuanjie-sjtu.github.io/graduation-project/final/技术展示-final.html) |
+| 答辩PPT-final.html | 答辩 PPT（最终版） | [在线预览](https://zhangyuanjie-sjtu.github.io/graduation-project/final/答辩PPT-final.html) |
+| 答辩稿.md | 答辩演讲稿（Markdown） | [查看](https://zhangyuanjie-sjtu.github.io/graduation-project/final/答辩稿.md) |
+| 答辩稿.docx | 答辩演讲稿（Word） | [下载](https://github.com/ZhangYuanJie-SJTU/graduation-project/raw/main/final/答辩稿.docx) |
+
+## 历史版本
 
 | 版本 | 页面标题 | 链接 |
 |---|---|---|
@@ -20,5 +30,6 @@
 ## 文件说明
 
 - `index.html` — 导航首页
-- `v1/` ~ `v5/` — 各版本展示页面（自包含 HTML，直接打开即可浏览）
+- `final/` — **最终版本文件**（3 个 HTML + 答辩稿 MD + 答辩稿 DOCX）
+- `v1/` ~ `v5/` — 历史版本展示页面（自包含 HTML，直接打开即可浏览）
 - `v1/毕业设计v1.0.md` — v1.0 Markdown 文本版

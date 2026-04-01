@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>面向心律失常老人的可穿戴多体征监护系统 — 答辩演示</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Noto+Sans+SC:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ========== RESET & VARIABLES ========== */
+:root{
+  --bg:#0a0f1e;--surface:rgba(15,23,42,0.55);
+  --cyan:#00e5ff;--purple:#bf5af2;--green:#06d6a0;--red:#ef4444;
+  --amber:#f59e0b;--rose:#fb7185;--white:#f0f0f5;--gray:#8892a4;
+  --dim:#4b5563;--faint:#1e293b;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-snap-type:y mandatory;scroll-behavior:smooth;overflow-x:hidden}
+body{font-family:'Outfit','Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--white);line-height:1.6;overflow-x:hidden}
+
+/* ========== SLIDE BASE ========== */
+.slide{
+  width:100vw;height:100vh;height:100dvh;
+  overflow:hidden;scroll-snap-align:start;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;padding:clamp(24px,5vw,64px);
+}
+
+/* ========== BACKGROUND GLOWS ========== */
+.slide::before{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+}
+.glow-c::before{background:radial-gradient(ellipse 60% 50% at 30% 40%,rgba(0,229,255,0.08),transparent 70%)}
+.glow-p::before{background:radial-gradient(ellipse 60% 50% at 70% 40%,rgba(191,90,242,0.08),transparent 70%)}
+.glow-r::before{background:radial-gradient(ellipse 60% 50% at 50% 30%,rgba(239,68,68,0.08),transparent 70%)}
+.glow-g::before{background:radial-gradient(ellipse 60% 50% at 40% 60%,rgba(6,214,160,0.08),transparent 70%)}
+.glow-a::before{background:radial-gradient(ellipse 60% 50% at 60% 50%,rgba(245,158,11,0.08),transparent 70%)}
+
+/* Background images */
+.slide[data-bg]::after{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+  background-size:cover;background-position:center;
+  opacity:0.04;mix-blend-mode:luminosity;
+}
+.slide[data-bg="ecg_wave"]::after{background-image:url(assets/ecg_wave.jpg)}
+.slide[data-bg="heart_monitor"]::after{background-image:url(assets/heart_monitor.jpg)}
+.slide[data-bg="medical_tech"]::after{background-image:url(assets/medical_tech.jpg)}
+.slide[data-bg="elderly_care"]::after{background-image:url(assets/elderly_care.jpg)}
+.slide[data-bg="smartwatch"]::after{background-image:url(assets/smartwatch.jpg)}
+.slide[data-bg="coding"]::after{background-image:url(assets/coding.jpg)}
+.slide[data-bg="circuit_board"]::after{background-image:url(assets/circuit_board.jpg)}
+.slide[data-bg="wearable_tech"]::after{background-image:url(assets/wearable_tech.jpg)}
+.slide[data-bg="neural_network"]::after{background-image:url(assets/neural_network.jpg)}
+.slide[data-bg="ai_brain"]::after{background-image:url(assets/ai_brain.jpg)}
+.slide[data-bg="data_dashboard"]::after{background-image:url(assets/data_dashboard.jpg)}
+
+/* ========== LAYOUTS ========== */
+.inner{position:relative;z-index:1;width:100%;max-width:1100px}
+
+/* Layout 1: Center */
+.lay-center .inner{text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(8px,1.5vh,20px)}
+.lay-center-left .inner{text-align:left;display:flex;flex-direction:column;justify-content:center;gap:clamp(8px,1.5vh,18px);max-width:800px}
+
+/* Layout 2: Split */
+.lay-split .inner{display:flex;align-items:center;gap:clamp(20px,4vw,60px)}
+.lay-split .split-left{flex:0 0 40%;text-align:center}
+.lay-split .split-right{flex:1;text-align:left}
+
+/* Layout 3: Cards */
+.lay-cards .inner{display:flex;flex-direction:column;gap:clamp(12px,2vh,24px)}
+.cards-row{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,2vw,24px)}
+
+/* Layout 4: Grid */
+.lay-grid .inner{display:flex;flex-direction:column;gap:clamp(10px,1.5vh,20px)}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,1.2vw,16px)}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(8px,1.2vw,16px)}
+.grid-2x2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(8px,1.5vw,20px)}
+.grid-3x2{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(8px,1.2vw,16px)}
+
+/* Layout 5: Table */
+.lay-table .inner{display:flex;flex-direction:column;gap:clamp(10px,1.5vh,20px)}
+
+/* Layout 6: Flow */
+.lay-flow .inner{display:flex;flex-direction:column;gap:clamp(8px,1vh,14px)}
+
+/* ========== TYPOGRAPHY ========== */
+.t-hero{font-family:'IBM Plex Mono',monospace;font-size:clamp(48px,10vw,120px);font-weight:700;line-height:1}
+.t-big{font-family:'IBM Plex Mono',monospace;font-size:clamp(36px,7vw,80px);font-weight:700;line-height:1.1}
+.t-title{font-family:'Outfit',sans-serif;font-size:clamp(28px,5vw,56px);font-weight:900;line-height:1.2}
+.t-mid{font-family:'Outfit','Noto Sans SC',sans-serif;font-size:clamp(18px,2.5vw,28px);font-weight:600;line-height:1.4}
+.t-body{font-size:clamp(13px,1.4vw,17px);line-height:1.7}
+.t-sm{font-size:clamp(11px,1.1vw,14px);line-height:1.5}
+.t-xs{font-size:clamp(9px,0.9vw,11px);line-height:1.4}
+.t-mono{font-family:'IBM Plex Mono',monospace}
+
+/* Colors */
+.c-cyan{color:var(--cyan)}.c-purple{color:var(--purple)}.c-green{color:var(--green)}
+.c-red{color:var(--red)}.c-amber{color:var(--amber)}.c-rose{color:var(--rose)}
+.c-white{color:var(--white)}.c-gray{color:var(--gray)}.c-dim{color:var(--dim)}
+.fw-700{font-weight:700}.fw-900{font-weight:900}
+.italic{font-style:italic}
+
+/* Glow text */
+.glow-text{text-shadow:0 0 40px rgba(0,229,255,0.3),0 0 80px rgba(0,229,255,0.15)}
+.glow-text-r{text-shadow:0 0 40px rgba(239,68,68,0.3),0 0 80px rgba(239,68,68,0.15)}
+.glow-text-p{text-shadow:0 0 40px rgba(191,90,242,0.3),0 0 80px rgba(191,90,242,0.15)}
+
+/* ========== COMPONENTS ========== */
+/* Card */
+.card{
+  background:var(--surface);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:0.5px solid rgba(255,255,255,0.08);border-radius:12px;
+  padding:clamp(12px,2vw,24px);
+}
+.card-cyan{border-left:3px solid var(--cyan)}
+.card-purple{border-left:3px solid var(--purple)}
+.card-green{border-left:3px solid var(--green)}
+.card-red{border-left:3px solid var(--red)}
+.card-amber{border-left:3px solid var(--amber)}
+.card-rose{border-left:3px solid var(--rose)}
+
+/* Top color bar */
+.card-top-gray{border-top:3px solid var(--dim)}
+.card-top-purple{border-top:3px solid var(--purple)}
+.card-top-green{border-top:3px solid var(--green)}
+.card-top-amber{border-top:3px solid var(--amber)}
+
+/* Table */
+.tbl{width:100%;border-collapse:collapse;font-size:clamp(10px,1.1vw,13px)}
+.tbl th{
+  background:rgba(0,229,255,0.1);color:var(--cyan);
+  padding:clamp(4px,0.6vh,8px) clamp(6px,1vw,14px);
+  text-align:left;font-weight:600;border-bottom:1px solid rgba(0,229,255,0.2);
+  white-space:nowrap;font-family:'IBM Plex Mono',monospace;
+}
+.tbl td{
+  padding:clamp(3px,0.5vh,7px) clamp(6px,1vw,14px);
+  border-bottom:0.5px solid rgba(255,255,255,0.05);
+  font-size:clamp(10px,1vw,13px);
+}
+.tbl tr.row-green td{background:rgba(6,214,160,0.06)}
+.tbl tr.row-amber td{background:rgba(245,158,11,0.06)}
+.tbl tr.row-red td{background:rgba(239,68,68,0.06)}
+
+/* Tags */
+.tag{display:inline-block;padding:2px 10px;border-radius:20px;font-size:clamp(9px,0.9vw,12px);font-weight:600;margin:2px}
+.tag-c{background:rgba(0,229,255,0.12);color:var(--cyan)}
+.tag-p{background:rgba(191,90,242,0.12);color:var(--purple)}
+.tag-g{background:rgba(6,214,160,0.12);color:var(--green)}
+.tag-r{background:rgba(239,68,68,0.12);color:var(--red)}
+.tag-a{background:rgba(245,158,11,0.12);color:var(--amber)}
+
+/* Divider */
+.divider{width:clamp(60px,10vw,120px);height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);margin:clamp(8px,1.5vh,16px) auto}
+.divider-full{width:100%;height:0.5px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);margin:clamp(8px,1vh,14px) 0}
+
+/* Arrow */
+.arrow{color:var(--dim);font-size:clamp(14px,1.5vw,22px);text-align:center;line-height:1}
+
+/* Progress bar (.pbar) */
+.pbar-row{display:flex;align-items:center;gap:clamp(6px,1vw,12px);margin:clamp(3px,0.5vh,6px) 0}
+.pbar-label{width:clamp(24px,3vw,36px);font-family:'IBM Plex Mono',monospace;font-size:clamp(11px,1.1vw,14px);font-weight:600;text-align:right;flex-shrink:0}
+.pbar-track{flex:1;height:clamp(14px,1.8vh,22px);background:rgba(255,255,255,0.04);border-radius:4px;overflow:hidden;position:relative}
+.pbar-fill{height:100%;border-radius:4px;transition:width 1s ease}
+.pbar-val{font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,1vw,13px);font-weight:600;margin-left:clamp(4px,0.5vw,8px);flex-shrink:0;width:clamp(30px,4vw,50px)}
+
+/* Bar chart */
+.bar-chart{display:flex;align-items:flex-end;gap:clamp(8px,2vw,24px);height:clamp(80px,12vh,140px);padding-top:8px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar-rect{width:100%;border-radius:4px 4px 0 0;transition:height 1s ease;min-width:20px}
+.bar-lbl{font-size:clamp(9px,0.8vw,11px);color:var(--gray);text-align:center}
+
+/* Flow step */
+.flow-step{display:flex;align-items:stretch;gap:clamp(8px,1.5vw,16px)}
+.flow-num{width:clamp(28px,3vw,40px);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:clamp(14px,1.5vw,20px);font-weight:700}
+.flow-content{flex:1}
+.flow-badge{font-family:'IBM Plex Mono',monospace;font-size:clamp(9px,0.8vw,11px);color:var(--gray);margin-left:auto;flex-shrink:0;display:flex;align-items:center;padding-left:12px}
+
+/* ECG SVG animation */
+.ecg-svg{width:clamp(200px,40vw,400px);height:60px}
+.ecg-svg path{stroke:var(--cyan);stroke-width:2;fill:none;stroke-dasharray:600;stroke-dashoffset:600;animation:ecgDraw 3s ease-in-out infinite}
+@keyframes ecgDraw{0%{stroke-dashoffset:600}50%{stroke-dashoffset:0}100%{stroke-dashoffset:-600}}
+
+/* ========== NAV / PROGRESS / HINT ========== */
+#prog{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--cyan),var(--purple));z-index:999;transition:width .3s;width:0}
+#pn{position:fixed;bottom:clamp(12px,2vh,24px);right:clamp(12px,2vw,24px);font-family:'IBM Plex Mono',monospace;font-size:clamp(11px,1.1vw,14px);color:var(--dim);z-index:999}
+#hint{position:fixed;bottom:clamp(12px,2vh,24px);left:50%;transform:translateX(-50%);font-size:clamp(10px,1vw,13px);color:var(--dim);z-index:999;opacity:1;transition:opacity 2s}
+
+/* ========== PARTICLE CANVAS ========== */
+#ptc{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ========== DELETE LINE ========== */
+.del{text-decoration:line-through;color:var(--dim)}
+
+/* Horizontal flow */
+.hflow{display:flex;align-items:center;gap:clamp(6px,1vw,14px);flex-wrap:wrap;justify-content:center}
+.hflow-card{
+  background:var(--surface);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:0.5px solid rgba(255,255,255,0.08);border-radius:10px;
+  padding:clamp(10px,1.5vw,20px) clamp(14px,2vw,28px);
+  text-align:center;flex:1;min-width:clamp(100px,14vw,160px);
+}
+
+/* Comparison pair */
+.cmp-pair{display:flex;gap:clamp(8px,1.5vw,16px);justify-content:center;align-items:stretch}
+
+/* Quote */
+.quote-card{
+  background:var(--surface);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(191,90,242,0.3);border-radius:12px;
+  padding:clamp(14px,2vw,24px);position:relative;
+}
+.quote-card::before{content:'\201C';position:absolute;top:-8px;left:16px;font-size:48px;color:var(--purple);opacity:0.4;line-height:1}
+
+/* Task row for dual-core */
+.task-row{display:flex;align-items:center;justify-content:space-between;padding:clamp(3px,0.4vh,6px) 0;border-bottom:0.5px solid rgba(255,255,255,0.04)}
+.task-row:last-child{border:none}
+.task-name{font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,1vw,13px);color:var(--white)}
+.task-pri{font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,1vw,13px);font-weight:600}
+
+/* ========== SCROLLBAR ========== */
+::-webkit-scrollbar{width:0;height:0}
+
+/* ========== RESPONSIVE ========== */
+@media(max-width:768px){
+  .cards-row,.grid-4,.grid-3,.grid-2x2,.grid-3x2{grid-template-columns:1fr}
+  .lay-split .inner{flex-direction:column}
+  .lay-split .split-left{flex:unset}
+  .hflow{flex-direction:column}
+  .cmp-pair{flex-direction:column}
+  .bar-chart{height:80px}
+}
+</style>
+</head>
+<body>
+
+<!-- Particle canvas -->
+<canvas id="ptc"></canvas>
+<!-- Progress bar -->
+<div id="prog"></div>
+<!-- Page number -->
+<div id="pn">1 / 23</div>
+<!-- Hint -->
+<div id="hint">Scroll / Arrow Keys / Space</div>
+
+<!-- ============================================================ -->
+<!-- P1: COVER -->
+<!-- ============================================================ -->
+<section class="slide lay-center glow-c" data-bg="ecg_wave">
+<div class="inner">
+  <svg class="ecg-svg" viewBox="0 0 400 60"><path d="M0,30 L80,30 L90,30 L100,28 L115,32 L125,30 L140,30 L150,30 L160,28 L165,-5 L170,55 L178,20 L185,30 L200,30 L215,24 L235,36 L255,24 L270,30 L400,30" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <p class="t-xs t-mono c-cyan" style="letter-spacing:4px;margin-bottom:clamp(8px,1.5vh,16px)">AIoT &middot; WEARABLE &middot; MEDICAL &middot; EDGE AI</p>
+  <h1 class="t-title c-white" style="line-height:1.3">
+    面向心律失常老人的<br>可穿戴多体征监护<span class="c-cyan">系统</span>
+  </h1>
+  <p class="t-sm c-gray" style="margin-top:clamp(4px,1vh,10px)">一款基于<span class="c-cyan fw-700">边缘AI</span>的AIoT可穿戴医疗电子设备</p>
+  <p class="t-xs t-mono c-dim" style="margin-top:clamp(4px,1vh,8px)">ESP32-S3 &middot; FPC柔性电路 &middot; TFLite Micro &middot; OneNET &middot; 微信小程序</p>
+  <div class="divider"></div>
+  <p class="t-sm c-gray">张元杰 &nbsp;|&nbsp; 武汉理工大学 &nbsp;|&nbsp; 指导教师：刘老师 &nbsp;|&nbsp; 2026.04</p>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P2: 张雪峰 -->
+<!-- ============================================================ -->
+<section class="slide lay-center-left glow-r" data-bg="heart_monitor">
+<div class="inner">
+  <p class="t-xs t-mono c-dim">2026.3.24</p>
+  <h2 class="t-title c-white" style="margin-top:4px">张雪峰，42岁</h2>
+  <h2 class="t-title c-red glow-text-r">心源性猝死</h2>
+  <div class="divider-full"></div>
+  <p class="t-body c-gray" style="max-width:600px;line-height:1.9">
+    跑步后突感不适，抢救3小时无效。<br>
+    2023年就曾因胸闷心悸住院。<br>
+    他的女儿，还没有成年。
+  </p>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P3: 55万 -->
+<!-- ============================================================ -->
+<section class="slide lay-split glow-r" data-bg="medical_tech">
+<div class="inner">
+  <div class="split-left">
+    <div class="t-hero c-cyan glow-text" style="white-space:nowrap">55<span class="t-big">万</span></div>
+    <p class="t-sm c-gray" style="margin-top:8px">每年心源性猝死</p>
+  </div>
+  <div class="split-right">
+    <h2 class="t-mid c-white" style="margin-bottom:12px">中国每年心源性猝死人数</h2>
+    <p class="t-body c-gray">每天 1,500 人 &middot; 每分钟 1 人</p>
+    <p class="t-body c-red fw-700" style="margin-top:8px">43% 的猝死者不到40岁</p>
+    <p class="t-xs c-dim" style="margin-top:16px">数据来源：国家心血管病中心</p>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P4: 51% -->
+<!-- ============================================================ -->
+<section class="slide lay-center glow-c" data-bg="elderly_care">
+<div class="inner">
+  <div class="t-hero c-cyan glow-text">51%</div>
+  <p class="t-mid c-white">的心脏骤停患者，事前有<span class="c-cyan fw-700">先兆</span>症状</p>
+  <p class="t-body c-gray">93% 的先兆出现在骤停前 24 小时内</p>
+  <div class="cmp-pair" style="margin-top:clamp(12px,2vh,24px);width:100%;max-width:500px">
+    <div class="card card-green" style="flex:5;text-align:center">
+      <div class="t-big c-green">32%</div>
+      <p class="t-sm c-gray">及时呼救生存率</p>
+    </div>
+    <div class="card card-red" style="flex:3;text-align:center">
+      <div class="t-mid c-red" style="font-family:'IBM Plex Mono',monospace;font-weight:700">6%</div>
+      <p class="t-sm c-gray">未呼救生存率</p>
+    </div>
+  </div>
+  <p class="t-xs c-dim" style="margin-top:8px">来源：Annals of Internal Medicine</p>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P5: 核心问题 -->
+<!-- ============================================================ -->
+<section class="slide lay-center glow-c" data-bg="smartwatch">
+<div class="inner">
+  <h2 class="t-title c-white">如果有一个设备</h2>
+  <p class="t-mid c-gray" style="line-height:2.2">
+    24小时监听心跳<br>
+    AI识别异常<br>
+    自动报警
+  </p>
+  <p class="t-mid c-cyan fw-700" style="margin-top:clamp(12px,2vh,24px)">这些悲剧，能不能被改变？</p>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P6: 导师 + 砍功能 -->
+<!-- ============================================================ -->
+<section class="slide lay-cards glow-p" data-bg="coding">
+<div class="inner">
+  <div class="quote-card">
+    <p class="t-body c-white italic" style="padding-left:20px">"你不是在做一个万能设备，你在做一个<span class="c-cyan fw-700">能救命</span>的专项产品。"</p>
+    <p class="t-sm c-gray" style="text-align:right;margin-top:8px">—— 刘老师</p>
+  </div>
+  <div class="cards-row">
+    <div class="card card-red">
+      <p class="t-sm c-red fw-700" style="margin-bottom:8px">&#10005; 砍掉</p>
+      <p class="t-sm c-dim"><span class="del">体温连续监测</span></p>
+      <p class="t-sm c-dim"><span class="del">睡眠分析</span></p>
+      <p class="t-sm c-dim"><span class="del">步数 &amp; 卡路里</span></p>
+      <p class="t-sm c-dim"><span class="del">呼吸频率</span></p>
+      <p class="t-sm c-dim"><span class="del">脉搏波形分析</span></p>
+      <p class="t-xs c-red" style="margin-top:10px">广而杂 -- 什么都做不精</p>
+    </div>
+    <div class="card card-green">
+      <p class="t-sm c-green fw-700" style="margin-bottom:8px">&#10003; 保留</p>
+      <p class="t-sm c-white">&#x1F49A; 心率血氧，连续监测</p>
+      <p class="t-sm c-white">&#x1F9E0; 心律失常，AI智能识别</p>
+      <p class="t-sm c-white">&#x1F6A8; 跌倒检测，自动报警</p>
+      <p class="t-sm c-white">&#x1F4F1; 云端通知，家属实时知道</p>
+      <p class="t-xs c-green" style="margin-top:10px">小而精 -- 每项产品级</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P7: 闭环 -->
+<!-- ============================================================ -->
+<section class="slide lay-center glow-g" data-bg="circuit_board">
+<div class="inner">
+  <p class="t-xs t-mono c-dim" style="margin-bottom:clamp(8px,1.5vh,16px)">TECHNICAL ROADMAP</p>
+  <div class="hflow">
+    <div class="hflow-card" style="border-left:3px solid var(--green)">
+      <p class="t-sm c-green fw-700">监测</p>
+      <p class="t-xs c-gray">传感器采集</p>
+    </div>
+    <span class="arrow">&rarr;</span>
+    <div class="hflow-card" style="border-left:3px solid var(--cyan)">
+      <p class="t-sm c-cyan fw-700">分析</p>
+      <p class="t-xs c-gray">AI边缘推理</p>
+    </div>
+    <span class="arrow">&rarr;</span>
+    <div class="hflow-card" style="border-left:3px solid var(--red)">
+      <p class="t-sm c-red fw-700">预警</p>
+      <p class="t-xs c-gray">异常检测</p>
+    </div>
+    <span class="arrow">&rarr;</span>
+    <div class="hflow-card" style="border-left:3px solid var(--purple)">
+      <p class="t-sm c-purple fw-700">通知</p>
+      <p class="t-xs c-gray">小程序推送</p>
+    </div>
+  </div>
+  <p class="t-mid c-white" style="margin-top:clamp(16px,3vh,32px)">监测 — 分析 — 预警 — 通知 <span class="c-cyan">完整闭环</span></p>
+  <p class="t-xs c-dim" style="margin-top:clamp(6px,1vh,12px)">不是一个传感器，不是一个APP——是一套完整的 <span class="c-cyan fw-700">AIoT可穿戴医疗电子</span> 解决方案</p>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P8: 8块板 -->
+<!-- ============================================================ -->
+<section class="slide lay-center glow-c" data-bg="wearable_tech">
+<div class="inner">
+  <div style="display:flex;align-items:baseline;justify-content:center;gap:8px">
+    <span class="t-hero c-cyan glow-text">8</span>
+    <span class="t-big c-gray">块板</span>
+  </div>
+  <div style="display:flex;align-items:baseline;justify-content:center;gap:8px;margin-top:clamp(4px,1vh,12px)">
+    <span class="t-big c-cyan">100</span>
+    <span class="t-mid c-gray">块打样</span>
+  </div>
+  <p class="t-body c-gray" style="margin-top:clamp(12px,2vh,24px)">从背带式到无感肌贴的进化之路</p>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P9: 四代 + 柱状图 -->
+<!-- ============================================================ -->
+<section class="slide lay-grid glow-a" data-bg="circuit_board">
+<div class="inner">
+  <h2 class="t-mid c-white" style="text-align:center">四代硬件迭代</h2>
+  <div class="grid-4">
+    <div class="card card-top-gray" style="text-align:center">
+      <p class="t-xs c-dim fw-700">G1</p>
+      <p class="t-sm c-white">10&times;10cm</p>
+      <p class="t-xs c-gray">背带式</p>
+      <p class="t-xs c-dim" style="letter-spacing:2px">&#9733;</p>
+    </div>
+    <div class="card card-top-purple" style="text-align:center">
+      <p class="t-xs c-purple fw-700">G2</p>
+      <p class="t-sm c-white">7&times;7cm</p>
+      <p class="t-xs c-gray">臂戴式</p>
+      <p class="t-xs c-purple" style="letter-spacing:2px">&#9733;&#9733;</p>
+    </div>
+    <div class="card card-top-green" style="text-align:center">
+      <p class="t-xs c-green fw-700">G3</p>
+      <p class="t-sm c-white">5+3cm</p>
+      <p class="t-xs c-gray">腕指分离</p>
+      <p class="t-xs c-green" style="letter-spacing:2px">&#9733;&#9733;&#9733;</p>
+    </div>
+    <div class="card card-top-amber" style="text-align:center;border:1px solid rgba(245,158,11,0.3);box-shadow:0 0 20px rgba(245,158,11,0.08)">
+      <p class="t-xs c-amber fw-700">G4 FINAL</p>
+      <p class="t-sm c-white">5&times;3&times;0.2mm</p>
+      <p class="t-xs c-gray">FPC肌贴式</p>
+      <p class="t-xs c-amber" style="letter-spacing:2px">&#9733;&#9733;&#9733;&#9733;&#9733;</p>
+    </div>
+  </div>
+  <p class="t-mid c-cyan" style="text-align:center">面积缩减 <span class="t-mono fw-700">85%</span></p>
+  <div style="max-width:500px;margin:0 auto;height:clamp(100px,15vh,160px)">
+    <canvas id="chartArea"></canvas>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P10: 150mA -->
+<!-- ============================================================ -->
+<section class="slide lay-center glow-p" data-bg="neural_network">
+<div class="inner">
+  <h2 class="t-title c-white">150mA &rarr; <span class="c-cyan glow-text">10&mu;A</span></h2>
+  <p class="t-body c-gray" style="margin-top:8px">用软件弥补硬件的极限</p>
+  <p class="t-sm c-dim" style="margin-top:clamp(8px,1.5vh,16px)">一万五千倍的差距</p>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P11: 双核 + 功耗 + 续航 -->
+<!-- ============================================================ -->
+<section class="slide lay-cards glow-c" data-bg="coding">
+<div class="inner">
+  <h2 class="t-mid c-white" style="text-align:center">FreeRTOS 双核并发 + 三级功耗</h2>
+  <div class="cards-row">
+    <div class="card card-red">
+      <p class="t-sm c-red fw-700" style="margin-bottom:6px">Core 1 -- 实时/计算</p>
+      <div class="task-row"><span class="task-name">task_max30102</span><span class="task-pri c-amber">P8</span></div>
+      <div class="task-row"><span class="task-name">task_mpu6050</span><span class="task-pri c-amber">P7</span></div>
+    </div>
+    <div class="card card-cyan">
+      <p class="t-sm c-cyan fw-700" style="margin-bottom:6px">Core 0 -- 控制/通信</p>
+      <div class="task-row"><span class="task-name">task_sos</span><span class="task-pri c-red">P15</span></div>
+      <div class="task-row"><span class="task-name">task_oled</span><span class="task-pri c-gray">P5</span></div>
+      <div class="task-row"><span class="task-name">task_onenet</span><span class="task-pri c-gray">P4</span></div>
+      <div class="task-row"><span class="task-name">task_gps</span><span class="task-pri c-dim">P3</span></div>
+    </div>
+  </div>
+  <div class="divider-full"></div>
+  <div class="grid-3">
+    <div class="card" style="text-align:center;border-top:2px solid var(--green)">
+      <p class="t-mono t-sm c-green fw-700">150mA</p>
+      <p class="t-xs c-gray">活跃模式</p>
+      <p class="t-xs c-dim">IR&gt;50000 全功率</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:2px solid var(--amber)">
+      <p class="t-mono t-sm c-amber fw-700">30mA</p>
+      <p class="t-xs c-gray">待机模式</p>
+      <p class="t-xs c-dim">30s无手指</p>
+    </div>
+    <div class="card" style="text-align:center;border-top:2px solid var(--purple)">
+      <p class="t-mono t-sm c-purple fw-700">10&mu;A</p>
+      <p class="t-xs c-gray">深度休眠</p>
+      <p class="t-xs c-dim">5min无手指</p>
+    </div>
+  </div>
+  <p class="t-mid c-cyan" style="text-align:center;margin-top:4px">日常续航 <span class="t-mono fw-700">9.26h</span> <span class="t-sm c-green">(+178%)</span></p>
+  <p class="t-xs t-mono c-dim" style="text-align:center">500mAh &divide; (0.2&times;150 + 0.8&times;30) = 9.26h</p>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P12: 心率算法 6步 -->
+<!-- ============================================================ -->
+<section class="slide lay-grid glow-g" data-bg="ecg_wave">
+<div class="inner">
+  <h2 class="t-mid c-white" style="text-align:center">功能一：心率血氧 — 6步信号处理</h2>
+  <div class="grid-3x2">
+    <div class="card card-cyan">
+      <p class="t-xs c-cyan fw-700">Step 1 &middot; 去直流</p>
+      <p class="t-xs t-mono c-gray">x[k] = ir[k] - mean</p>
+    </div>
+    <div class="card card-cyan">
+      <p class="t-xs c-cyan fw-700">Step 2 &middot; 移动平均</p>
+      <p class="t-xs t-mono c-gray">4点MA滤波</p>
+    </div>
+    <div class="card card-purple">
+      <p class="t-xs c-purple fw-700">Step 3 &middot; 差分</p>
+      <p class="t-xs t-mono c-gray">突出斜率变化</p>
+    </div>
+    <div class="card card-purple">
+      <p class="t-xs c-purple fw-700">Step 4 &middot; Hamming窗</p>
+      <p class="t-xs t-mono c-gray">{41,276,512,276,41}</p>
+    </div>
+    <div class="card card-amber">
+      <p class="t-xs c-amber fw-700">Step 5 &middot; 峰值检测</p>
+      <p class="t-xs t-mono c-gray">自适应阈值 MAD</p>
+    </div>
+    <div class="card card-green">
+      <p class="t-xs c-green fw-700">Step 6 &middot; 卡尔曼</p>
+      <p class="t-xs t-mono c-gray">Q=0.01 R=10 K&times;0.1/0.3</p>
+    </div>
+  </div>
+  <div class="divider-full"></div>
+  <div class="grid-3" style="text-align:center">
+    <div>
+      <p class="t-xs c-gray">血氧公式</p>
+      <p class="t-xs t-mono c-white">R = (AC<sub>red</sub>/DC<sub>red</sub>) &divide; (AC<sub>ir</sub>/DC<sub>ir</sub>)</p>
+    </div>
+    <div>
+      <p class="t-xs c-gray">心率精度</p>
+      <p class="t-sm t-mono c-cyan fw-700">&plusmn;2 bpm</p>
+    </div>
+    <div>
+      <p class="t-xs c-gray">血氧精度</p>
+      <p class="t-sm t-mono c-green fw-700">&plusmn;2%</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P13: 29.41KB -->
+<!-- ============================================================ -->
+<section class="slide lay-center glow-p" data-bg="ai_brain">
+<div class="inner">
+  <div class="t-hero t-mono c-cyan glow-text">29.41 <span class="t-big">KB</span></div>
+  <p class="t-mid c-white" style="margin-top:clamp(8px,1.5vh,16px)">功能二：心律失常AI — <span class="c-cyan">全系统最核心</span></p>
+  <p class="t-body c-gray">不到一张表情包的大小</p>
+  <div style="margin-top:clamp(8px,1.5vh,16px);display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+    <span class="tag tag-c">6类心律失常</span>
+    <span class="tag tag-a">&lt;50ms推理</span>
+    <span class="tag tag-g">无需联网</span>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P14: AI四步 -->
+<!-- ============================================================ -->
+<section class="slide lay-grid glow-c" data-bg="data_dashboard">
+<div class="inner">
+  <h2 class="t-mid c-white" style="text-align:center">AI检测技术路线：四步走</h2>
+  <div class="grid-2x2">
+    <div class="card card-cyan">
+      <p class="t-sm c-cyan fw-700">Step 1 &middot; 数据</p>
+      <p class="t-xs c-white">MIT-BIH 48记录 110K心搏</p>
+      <p class="t-xs c-gray">ECG&rarr;PPG双通道转换</p>
+      <p class="t-xs c-gray">360&rarr;100Hz &middot; 4s窗口</p>
+      <p class="t-xs t-mono c-dim">最终 (22030, 400, 2)</p>
+    </div>
+    <div class="card card-purple">
+      <p class="t-sm c-purple fw-700">Step 2 &middot; 模型</p>
+      <p class="t-xs c-white">1D-CNN 4层Conv</p>
+      <p class="t-xs c-gray">GAP + Dense + Softmax</p>
+      <p class="t-xs c-gray">80 epochs &middot; Adam</p>
+      <p class="t-xs t-mono c-dim">总参数 16,400</p>
+    </div>
+    <div class="card card-amber">
+      <p class="t-sm c-amber fw-700">Step 3 &middot; 量化</p>
+      <p class="t-xs c-white">89KB &rarr; 29.41KB</p>
+      <p class="t-xs c-gray">3.03&times; 压缩 &middot; 损失&lt;1%</p>
+      <p class="t-xs t-mono c-dim">q = round(r/S) + Z</p>
+    </div>
+    <div class="card card-green">
+      <p class="t-sm c-green fw-700">Step 4 &middot; 防误报</p>
+      <p class="t-xs c-white">置信度 &ge; 30% 才更新</p>
+      <p class="t-xs c-gray">&lt;30% 保持上次结果</p>
+      <p class="t-xs c-gray">Tensor Arena 120KB</p>
+      <p class="t-xs t-mono c-dim">&lt;50ms 推理</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P15: 跌倒检测三重判定 -->
+<!-- ============================================================ -->
+<section class="slide lay-flow glow-r" data-bg="wearable_tech">
+<div class="inner">
+  <h2 class="t-mid c-white" style="text-align:center">功能三：跌倒检测 — 三重复合判定</h2>
+  <div class="flow-step">
+    <div class="flow-num c-amber">1</div>
+    <div class="card card-amber flow-content" style="padding:clamp(8px,1vh,14px) clamp(10px,1.5vw,20px)">
+      <p class="t-sm c-white">冲击检测：合加速度 &gt; <span class="t-mono c-amber fw-700">2.5g</span></p>
+    </div>
+    <div class="flow-badge">IMPACT</div>
+  </div>
+  <div class="arrow">&darr;</div>
+  <div class="flow-step">
+    <div class="flow-num c-cyan">2</div>
+    <div class="card card-cyan flow-content" style="padding:clamp(8px,1vh,14px) clamp(10px,1.5vw,20px)">
+      <p class="t-sm c-white">静止确认：&Delta;a &lt; 0.2g 持续 &gt; <span class="t-mono c-cyan fw-700">1s</span></p>
+    </div>
+    <div class="flow-badge">STILL</div>
+  </div>
+  <div class="arrow">&darr;</div>
+  <div class="flow-step">
+    <div class="flow-num c-purple">3</div>
+    <div class="card card-purple flow-content" style="padding:clamp(8px,1vh,14px) clamp(10px,1.5vw,20px)">
+      <p class="t-sm c-white">姿态确认：姿态角变化 &gt; <span class="t-mono c-purple fw-700">45&deg;</span></p>
+    </div>
+    <div class="flow-badge">CONFIRM</div>
+  </div>
+  <div class="arrow">&darr;</div>
+  <div class="flow-step">
+    <div class="flow-num c-red">!</div>
+    <div class="card card-red flow-content" style="padding:clamp(8px,1vh,14px) clamp(10px,1.5vw,20px)">
+      <p class="t-sm c-white">三条件满足 = <span class="c-red fw-700">跌倒</span> &rarr; LED + 蜂鸣器 + 云端推送</p>
+    </div>
+  </div>
+  <p class="t-xs c-dim" style="text-align:center;margin-top:4px">SOS GPIO38 中断 P15 最高优先级 &nbsp;|&nbsp; KEY3 解除报警</p>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P16: MQTT + 小程序 -->
+<!-- ============================================================ -->
+<section class="slide lay-cards glow-a" data-bg="neural_network">
+<div class="inner">
+  <h2 class="t-mid c-white" style="text-align:center">功能四：通信链路 + 心镜Pro</h2>
+  <div class="cards-row">
+    <div class="card card-cyan">
+      <p class="t-sm c-cyan fw-700" style="margin-bottom:6px">MQTT 分层上报</p>
+      <p class="t-xs c-white"><span class="tag tag-a" style="font-size:9px">20Hz</span> raw_ir 高频波形</p>
+      <p class="t-xs c-white"><span class="tag tag-c" style="font-size:9px">1Hz</span> HR/SpO2/Temp/类型</p>
+      <p class="t-xs c-white"><span class="tag tag-r" style="font-size:9px">EVENT</span> 报警即时触发</p>
+      <p class="t-xs t-mono c-dim" style="margin-top:6px">mqtts.heclouds.com:1883</p>
+    </div>
+    <div class="card card-purple">
+      <p class="t-sm c-purple fw-700" style="margin-bottom:6px">心镜Pro 小程序</p>
+      <p class="t-xs c-white">200ms 轮询 &middot; 40fps 波形</p>
+      <p class="t-xs c-white">6类心律失常识别显示</p>
+      <p class="t-xs c-white">GPS定位 &middot; 紧急报警</p>
+      <p class="t-xs c-dim" style="margin-top:6px">兼容 iOS / Android / 鸿蒙</p>
+    </div>
+  </div>
+  <div class="divider-full"></div>
+  <p class="t-mid c-cyan" style="text-align:center">端到端 <span class="t-mono fw-700 glow-text">420ms</span></p>
+  <p class="t-xs t-mono c-dim" style="text-align:center">采集10 + AI50 + 处理10 + MQTT100 + 网络50 + 轮询200</p>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P17: 89.48% -->
+<!-- ============================================================ -->
+<section class="slide lay-center glow-c" data-bg="data_dashboard">
+<div class="inner">
+  <p class="t-sm c-gray" style="margin-bottom:clamp(8px,1.5vh,16px)">模型验证 — 用数学说话</p>
+  <div style="display:flex;gap:clamp(20px,5vw,60px);justify-content:center;align-items:center;flex-wrap:wrap">
+    <div style="text-align:center">
+      <div class="t-hero t-mono c-cyan glow-text" style="font-size:clamp(40px,8vw,96px)">89.48%</div>
+      <p class="t-sm c-gray">Overall Accuracy</p>
+      <p class="t-xs t-mono c-dim">3690 / 4124</p>
+    </div>
+    <div style="text-align:center">
+      <div class="t-hero t-mono c-purple glow-text-p" style="font-size:clamp(40px,8vw,96px)">89.42%</div>
+      <p class="t-sm c-gray">Weighted F1</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P18: 逐类别表格 -->
+<!-- ============================================================ -->
+<section class="slide lay-table glow-p">
+<div class="inner">
+  <h2 class="t-mid c-white" style="text-align:center">逐类别 Precision / Recall / F1</h2>
+  <div style="overflow-x:auto">
+  <table class="tbl" style="min-width:700px">
+    <thead>
+      <tr><th>类别</th><th>样本</th><th>权重</th><th>TP</th><th>FP</th><th>FN</th><th>Precision</th><th>Recall</th><th>F1</th></tr>
+    </thead>
+    <tbody>
+      <tr class="row-green"><td><span class="c-green fw-700">N</span> 正常</td><td>2150</td><td>0.52</td><td>2051</td><td>114</td><td>99</td><td class="c-green fw-700">94.7%</td><td class="c-green fw-700">95.4%</td><td class="c-green fw-700">95.1%</td></tr>
+      <tr><td><span class="c-white fw-700">T</span> 心动过速</td><td>500</td><td>1.85</td><td>412</td><td>88</td><td>88</td><td>82.4%</td><td>82.4%</td><td>82.4%</td></tr>
+      <tr><td><span class="c-white fw-700">B</span> 心动过缓</td><td>425</td><td>2.31</td><td>358</td><td>65</td><td>67</td><td>84.6%</td><td>84.2%</td><td>84.4%</td></tr>
+      <tr><td><span class="c-white fw-700">A</span> 心律不齐</td><td>378</td><td>1.67</td><td>298</td><td>84</td><td>80</td><td>78.0%</td><td>78.8%</td><td>78.4%</td></tr>
+      <tr class="row-amber"><td><span class="c-amber fw-700">P</span> 早搏</td><td>545</td><td>1.23</td><td>482</td><td>55</td><td>63</td><td class="c-amber">89.8%</td><td class="c-amber">88.4%</td><td class="c-amber fw-700">89.1%</td></tr>
+      <tr class="row-red"><td><span class="c-red fw-700">S</span> 漏搏</td><td>126</td><td>3.45</td><td>89</td><td>28</td><td>37</td><td class="c-red">76.1%</td><td class="c-red">70.6%</td><td class="c-red fw-700">73.3%</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P19: F1对比 + 发现 -->
+<!-- ============================================================ -->
+<section class="slide lay-flow glow-c">
+<div class="inner">
+  <h2 class="t-mid c-white" style="text-align:center">F1-Score 对比 + 关键发现</h2>
+  <!-- Chart.js 双图 -->
+  <div class="grid-2">
+    <div style="height:clamp(140px,22vh,220px);position:relative"><canvas id="chartRadar"></canvas></div>
+    <div style="height:clamp(140px,22vh,220px);position:relative"><canvas id="chartF1"></canvas></div>
+  </div>
+  <div class="divider-full"></div>
+  <div class="grid-3">
+    <div class="card card-green" style="text-align:center">
+      <p class="t-sm c-green fw-700">&#10003; 最强</p>
+      <p class="t-xs c-gray">N 正常 &amp; P 早搏</p>
+      <p class="t-xs c-dim">样本充足，特征显著</p>
+    </div>
+    <div class="card card-red" style="text-align:center">
+      <p class="t-sm c-red fw-700">&#10005; 最弱</p>
+      <p class="t-xs c-gray">S 漏搏 F1=73.3%</p>
+      <p class="t-xs c-dim">仅126样本(3%)</p>
+    </div>
+    <div class="card card-purple" style="text-align:center">
+      <p class="t-sm c-purple fw-700">? 偏弱</p>
+      <p class="t-xs c-gray">A 心律不齐</p>
+      <p class="t-xs c-dim">边界模糊易混淆</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P20: 诚实面对不足 -->
+<!-- ============================================================ -->
+<section class="slide lay-center glow-r" data-bg="heart_monitor">
+<div class="inner" style="max-width:700px">
+  <h2 class="t-title c-white italic" style="margin-bottom:clamp(16px,3vh,32px)">诚实面对不足</h2>
+  <div class="card card-red" style="margin-bottom:clamp(8px,1.2vh,14px)">
+    <p class="t-sm c-red fw-700">漏搏 F1 仅 73.3%</p>
+    <p class="t-xs c-gray">训练样本仅 126 个，全部数据的 3%</p>
+  </div>
+  <div class="card card-red" style="margin-bottom:clamp(8px,1.2vh,14px)">
+    <p class="t-sm c-red fw-700">PPG 受运动干扰</p>
+    <p class="t-xs c-gray">剧烈运动时精度下降</p>
+  </div>
+  <div class="card card-red">
+    <p class="t-sm c-red fw-700">未大规模临床验证</p>
+    <p class="t-xs c-gray">需更多真实场景数据支撑</p>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P21: 5创新 -->
+<!-- ============================================================ -->
+<section class="slide lay-flow glow-c" data-bg="circuit_board">
+<div class="inner" style="max-width:800px">
+  <h2 class="t-mid c-white" style="text-align:center;margin-bottom:clamp(8px,1.5vh,16px)">5个核心创新</h2>
+
+  <div style="display:flex;align-items:center;gap:clamp(8px,1.5vw,16px);padding:clamp(6px,1vh,12px) 0">
+    <span class="t-big c-cyan" style="width:clamp(30px,4vw,48px);text-align:center;flex-shrink:0">1</span>
+    <div><p class="t-sm c-white fw-700">边缘AI</p><p class="t-xs t-mono c-gray">29.41KB / &lt;50ms / 6类 / 无需联网</p></div>
+  </div>
+  <div class="divider-full"></div>
+
+  <div style="display:flex;align-items:center;gap:clamp(8px,1.5vw,16px);padding:clamp(6px,1vh,12px) 0">
+    <span class="t-big c-purple" style="width:clamp(30px,4vw,48px);text-align:center;flex-shrink:0">2</span>
+    <div><p class="t-sm c-white fw-700">四代迭代</p><p class="t-xs t-mono c-gray">0.2mm FPC / 100打样 / 肌贴式</p></div>
+  </div>
+  <div class="divider-full"></div>
+
+  <div style="display:flex;align-items:center;gap:clamp(8px,1.5vw,16px);padding:clamp(6px,1vh,12px) 0">
+    <span class="t-big c-green" style="width:clamp(30px,4vw,48px);text-align:center;flex-shrink:0">3</span>
+    <div><p class="t-sm c-white fw-700">双核并发</p><p class="t-xs t-mono c-gray">8级优先级精细调度</p></div>
+  </div>
+  <div class="divider-full"></div>
+
+  <div style="display:flex;align-items:center;gap:clamp(8px,1.5vw,16px);padding:clamp(6px,1vh,12px) 0">
+    <span class="t-big c-amber" style="width:clamp(30px,4vw,48px);text-align:center;flex-shrink:0">4</span>
+    <div><p class="t-sm c-white fw-700">三级功耗</p><p class="t-xs t-mono c-gray">+178% 续航 / 10&mu;A 深睡</p></div>
+  </div>
+  <div class="divider-full"></div>
+
+  <div style="display:flex;align-items:center;gap:clamp(8px,1.5vw,16px);padding:clamp(6px,1vh,12px) 0">
+    <span class="t-big c-red" style="width:clamp(30px,4vw,48px);text-align:center;flex-shrink:0">5</span>
+    <div><p class="t-sm c-white fw-700">全链路闭环</p><p class="t-xs t-mono c-gray">420ms 端到端</p></div>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P22: 听诊器 -->
+<!-- ============================================================ -->
+<section class="slide lay-center glow-p" data-bg="elderly_care">
+<div class="inner">
+  <p class="t-mid c-white" style="line-height:2.4">一块5厘米的柔性电路板</p>
+  <p class="t-mid c-white" style="line-height:2.4">一个29KB的AI模型</p>
+  <p class="t-mid c-white" style="line-height:2.4">一行行代码</p>
+  <div style="height:clamp(20px,4vh,48px)"></div>
+  <p class="t-title c-cyan italic glow-text" style="font-size:clamp(24px,4vw,48px)">24小时不休息的听诊器</p>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- P23: 致谢 -->
+<!-- ============================================================ -->
+<section class="slide lay-center glow-p" data-bg="medical_tech">
+<div class="inner">
+  <h2 class="t-title c-white italic" style="line-height:1.6;font-size:clamp(24px,4vw,44px)">感谢各位评委老师<br>的聆听与指导</h2>
+  <div class="divider"></div>
+  <p class="t-xs t-mono c-dim">武汉理工大学 &middot; 张元杰 &middot; 刘老师 &middot; 2026.04</p>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- JAVASCRIPT -->
+<!-- ============================================================ -->
+<script>
+(function(){
+  'use strict';
+
+  /* ---- Particle Background ---- */
+  const cvs = document.getElementById('ptc');
+  const ctx = cvs.getContext('2d');
+  let W, H;
+  function resize(){
+    W = cvs.width = window.innerWidth;
+    H = cvs.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const PCOUNT = 70;
+  const LINK_DIST = 130;
+  const particles = [];
+  for(let i = 0; i < PCOUNT; i++){
+    particles.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      r: Math.random() * 1.5 + 0.5
+    });
+  }
+
+  function drawParticles(){
+    ctx.clearRect(0, 0, W, H);
+    for(let i = 0; i < PCOUNT; i++){
+      const p = particles[i];
+      p.x += p.vx; p.y += p.vy;
+      if(p.x < 0) p.x = W;
+      if(p.x > W) p.x = 0;
+      if(p.y < 0) p.y = H;
+      if(p.y > H) p.y = 0;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,229,255,0.3)';
+      ctx.fill();
+      for(let j = i + 1; j < PCOUNT; j++){
+        const q = particles[j];
+        const dx = p.x - q.x, dy = p.y - q.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if(dist < LINK_DIST){
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(q.x, q.y);
+          ctx.strokeStyle = 'rgba(0,229,255,' + (0.12 * (1 - dist / LINK_DIST)) + ')';
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(drawParticles);
+  }
+  drawParticles();
+
+  /* ---- Slides & Navigation ---- */
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  const prog = document.getElementById('prog');
+  const pn = document.getElementById('pn');
+  const hint = document.getElementById('hint');
+  let currentSlide = 0;
+
+  function updateUI(idx){
+    currentSlide = idx;
+    prog.style.width = ((idx + 1) / total * 100) + '%';
+    pn.textContent = (idx + 1) + ' / ' + total;
+  }
+
+  // IntersectionObserver to track current slide
+  const obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting && e.intersectionRatio > 0.5){
+        const idx = Array.prototype.indexOf.call(slides, e.target);
+        if(idx !== -1) updateUI(idx);
+      }
+    });
+  }, { threshold: 0.5 });
+  slides.forEach(function(s){ obs.observe(s); });
+
+  function goTo(idx){
+    if(idx < 0 || idx >= total) return;
+    slides[idx].scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // Keyboard
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown'){
+      e.preventDefault(); goTo(currentSlide + 1);
+    } else if(e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp'){
+      e.preventDefault(); goTo(currentSlide - 1);
+    } else if(e.key === 'Home'){
+      e.preventDefault(); goTo(0);
+    } else if(e.key === 'End'){
+      e.preventDefault(); goTo(total - 1);
+    } else if(e.key === 'f' || e.key === 'F'){
+      if(!document.fullscreenElement){
+        document.documentElement.requestFullscreen().catch(function(){});
+      } else {
+        document.exitFullscreen();
+      }
+    }
+  });
+
+  // Wheel debounce
+  let wheelLock = false;
+  document.addEventListener('wheel', function(e){
+    if(wheelLock) return;
+    wheelLock = true;
+    if(e.deltaY > 0) goTo(currentSlide + 1);
+    else if(e.deltaY < 0) goTo(currentSlide - 1);
+    setTimeout(function(){ wheelLock = false; }, 600);
+  }, { passive: true });
+
+  // Touch swipe
+  let touchY = 0;
+  document.addEventListener('touchstart', function(e){
+    touchY = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchend', function(e){
+    const dy = touchY - e.changedTouches[0].clientY;
+    if(Math.abs(dy) > 50){
+      if(dy > 0) goTo(currentSlide + 1);
+      else goTo(currentSlide - 1);
+    }
+  }, { passive: true });
+
+  // Hide hint after 5s
+  setTimeout(function(){
+    if(hint) hint.style.opacity = '0';
+  }, 5000);
+
+  // Init
+  updateUI(0);
+
+})();
+
+// ========== CHART.JS INITIALIZATION ==========
+window.addEventListener('load', function() {
+  Chart.defaults.color = '#4b5563';
+  Chart.defaults.borderColor = 'rgba(75,85,99,0.06)';
+  Chart.defaults.font.family = "'Noto Sans SC',sans-serif";
+  Chart.defaults.font.size = 11;
+
+  // Area reduction bar chart (P9)
+  const areaEl = document.getElementById('chartArea');
+  if (areaEl) {
+    new Chart(areaEl, {
+      type: 'bar',
+      data: {
+        labels: ['G1 探索', 'G2 优化', 'G3 突破', 'G4 最终'],
+        datasets: [{
+          data: [100, 49, 34, 15],
+          backgroundColor: ['rgba(75,85,99,0.5)', 'rgba(191,90,242,0.5)', 'rgba(6,214,160,0.5)', 'rgba(245,158,11,0.7)'],
+          borderColor: ['#4b5563', '#bf5af2', '#06d6a0', '#f59e0b'],
+          borderWidth: 1.5, borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false },
+          tooltip: { callbacks: { afterLabel: function(c) { return ['基准', '-51%', '-31%', '-56%'][c.dataIndex]; } } }
+        },
+        scales: {
+          y: { beginAtZero: true, grid: { color: 'rgba(75,85,99,0.05)' }, title: { display: true, text: '面积 cm²', font: { size: 10 } } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  // Radar chart (P19)
+  const radarEl = document.getElementById('chartRadar');
+  if (radarEl) {
+    new Chart(radarEl, {
+      type: 'radar',
+      data: {
+        labels: ['N正常', 'T过速', 'B过缓', 'A不齐', 'P早搏', 'S漏搏'],
+        datasets: [
+          { label: 'Precision', data: [94.73, 82.4, 84.63, 78.01, 89.76, 76.07], borderColor: '#00e5ff', backgroundColor: 'rgba(0,229,255,0.06)', pointBackgroundColor: '#00e5ff', borderWidth: 1.5, pointRadius: 3 },
+          { label: 'Recall', data: [95.4, 82.4, 84.24, 78.84, 88.44, 70.63], borderColor: '#06d6a0', backgroundColor: 'rgba(6,214,160,0.05)', pointBackgroundColor: '#06d6a0', borderWidth: 1.5, pointRadius: 3 },
+          { label: 'F1', data: [95.06, 82.4, 84.43, 78.42, 89.1, 73.25], borderColor: '#bf5af2', backgroundColor: 'rgba(191,90,242,0.05)', pointBackgroundColor: '#bf5af2', borderWidth: 1.5, pointRadius: 3 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { r: { min: 60, max: 100, ticks: { stepSize: 10, font: { size: 8 } }, grid: { color: 'rgba(75,85,99,0.08)' }, pointLabels: { font: { size: 9 } } } },
+        plugins: { legend: { labels: { boxWidth: 8, font: { size: 9 } } } }
+      }
+    });
+  }
+
+  // F1 bar chart (P19)
+  const f1El = document.getElementById('chartF1');
+  if (f1El) {
+    new Chart(f1El, {
+      type: 'bar',
+      data: {
+        labels: ['N正常', 'P早搏', 'B过缓', 'T过速', 'A不齐', 'S漏搏'],
+        datasets: [{
+          data: [95.06, 89.1, 84.43, 82.4, 78.42, 73.25],
+          backgroundColor: ['rgba(6,214,160,0.6)', 'rgba(245,158,11,0.6)', 'rgba(0,229,255,0.5)', 'rgba(239,68,68,0.5)', 'rgba(191,90,242,0.5)', 'rgba(251,113,133,0.6)'],
+          borderColor: ['#06d6a0', '#f59e0b', '#00e5ff', '#ef4444', '#bf5af2', '#fb7185'],
+          borderWidth: 1.5, borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { min: 60, max: 100, grid: { color: 'rgba(75,85,99,0.05)' }, title: { display: true, text: 'F1 %', font: { size: 9 } } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+});
+</script>
+</body>
+</html>

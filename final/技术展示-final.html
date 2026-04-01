@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>面向心律失常高风险独居老人的可穿戴多体征监护系统</title>
+<style>
+:root{--bg:#0a0e27;--bg2:#0d1233;--card:rgba(0,240,255,0.04);--card-h:rgba(0,240,255,0.08);--cyan:#00f0ff;--green:#00ff88;--red:#ff3366;--amber:#ffaa00;--purple:#a855f7;--txt:#e0e6ed;--head:#fff;--mute:#7b8ba8;--bdr:rgba(0,240,255,0.15);--bdr-g:rgba(0,240,255,0.3);--sw:260px;--fb:'Segoe UI',system-ui,sans-serif;--fm:'Cascadia Code','Fira Code',Consolas,monospace}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}body{font-family:var(--fb);background:var(--bg);color:var(--txt);line-height:1.7;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:linear-gradient(rgba(0,240,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,0.03) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0}
+.sidebar{position:fixed;left:0;top:0;width:var(--sw);height:100vh;background:linear-gradient(180deg,#0b1030,#080c22);border-right:1px solid var(--bdr);padding:24px 0;overflow-y:auto;z-index:100;display:flex;flex-direction:column}
+.sidebar::-webkit-scrollbar{width:4px}.sidebar::-webkit-scrollbar-thumb{background:var(--cyan);border-radius:2px}
+.sidebar-logo{text-align:center;padding:0 16px 20px;border-bottom:1px solid var(--bdr);margin-bottom:16px}
+.sidebar-logo h2{font-size:15px;color:var(--cyan);letter-spacing:2px}.sidebar-logo .sub{font-size:11px;color:var(--mute);margin-top:4px}
+.nav-list{list-style:none;flex:1}.nav-item{padding:10px 20px;cursor:pointer;font-size:13px;color:var(--mute);border-left:3px solid transparent;transition:all .3s;display:flex;align-items:center;gap:10px}
+.nav-item:hover{color:var(--cyan);background:rgba(0,240,255,0.05)}.nav-item.active{color:var(--cyan);border-left-color:var(--cyan);background:rgba(0,240,255,0.08);font-weight:600}
+.main{margin-left:var(--sw);min-height:100vh;position:relative;z-index:1}.page{display:none;padding:40px 50px 60px;animation:fadeIn .5s;max-width:1200px;margin:0 auto}.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+h1{font-size:32px;font-weight:700;color:var(--head);margin-bottom:12px;position:relative;padding-bottom:16px}
+h1::after{content:'';position:absolute;bottom:0;left:0;width:60px;height:3px;background:linear-gradient(90deg,var(--cyan),transparent);border-radius:2px}
+h2{font-size:22px;font-weight:600;color:var(--head);margin:32px 0 16px}h3{font-size:17px;font-weight:600;color:var(--cyan);margin:24px 0 12px}p{margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:24px;margin-bottom:20px;transition:all .3s}.card:hover{background:var(--card-h);border-color:var(--bdr-g);box-shadow:0 0 30px rgba(0,240,255,0.08)}
+.dt{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}.dt th{background:rgba(0,240,255,0.1);color:var(--cyan);padding:10px 14px;text-align:left;font-weight:600;border-bottom:2px solid var(--cyan);white-space:nowrap}.dt td{padding:9px 14px;border-bottom:1px solid rgba(0,240,255,0.06)}.dt tr:hover td{background:rgba(0,240,255,0.04)}.dt tr:nth-child(even) td{background:rgba(0,240,255,0.02)}
+.cover{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;position:relative;overflow:hidden}
+#ecgCanvas{position:absolute;top:0;left:0;width:100%;height:100%;opacity:.15}.cover-content{position:relative;z-index:2}
+.cover h1{font-size:38px;line-height:1.4;margin-bottom:16px;background:linear-gradient(135deg,#fff,var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.cover h1::after{display:none}
+.cover .subtitle{font-size:18px;color:var(--cyan);margin-bottom:30px;letter-spacing:4px}.cover .meta{font-size:14px;color:var(--mute);line-height:2}.cover .meta strong{color:var(--txt)}
+.cover .divider{width:100px;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);margin:20px auto}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:20px 0}
+.stat-card{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:20px;text-align:center;transition:all .3s}.stat-card:hover{border-color:var(--cyan);box-shadow:0 0 20px rgba(0,240,255,0.1);transform:translateY(-2px)}
+.stat-value{font-size:28px;font-weight:700;background:linear-gradient(135deg,var(--cyan),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.stat-label{font-size:12px;color:var(--mute);margin-top:4px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:900px){.two-col{grid-template-columns:1fr}.sidebar{display:none}.main{margin-left:0}.page{padding:20px}}
+.tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;margin:2px 4px}
+.tag-c{background:rgba(0,240,255,0.15);color:var(--cyan)}.tag-g{background:rgba(0,255,136,0.15);color:var(--green)}.tag-r{background:rgba(255,51,102,0.15);color:var(--red)}.tag-a{background:rgba(255,170,0,0.15);color:var(--amber)}.tag-p{background:rgba(168,85,247,0.15);color:var(--purple)}
+.arch-row{display:flex;align-items:center;gap:12px;margin:8px 0}.arch-box{background:rgba(0,240,255,0.08);border:1px solid var(--bdr);border-radius:8px;padding:14px 20px;text-align:center;flex:1}.arch-box.p{border-color:var(--cyan);box-shadow:0 0 15px rgba(0,240,255,0.15)}.arch-box .lb{font-size:11px;color:var(--mute);margin-bottom:4px}.arch-box .vl{font-size:14px;font-weight:600;color:var(--head)}.arch-arrow{color:var(--cyan);font-size:20px;flex-shrink:0}
+.timeline{position:relative;padding-left:30px;margin:20px 0}.timeline::before{content:'';position:absolute;left:10px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--cyan),var(--purple),var(--green))}
+.tl-item{position:relative;margin-bottom:28px;padding:16px 20px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;transition:all .3s}.tl-item:hover{border-color:var(--bdr-g);box-shadow:0 0 20px rgba(0,240,255,0.08)}.tl-item::before{content:'';position:absolute;left:-24px;top:20px;width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+.tl-title{font-size:15px;font-weight:700;color:var(--cyan);margin-bottom:6px}.tl-spec{font-size:13px;color:var(--txt);margin-bottom:4px}.tl-detail{font-size:12px;color:var(--mute)}
+.flow-steps{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin:20px 0}.flow-step{background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:12px 18px;text-align:center;min-width:100px}.flow-step .st{font-size:12px;font-weight:600;color:var(--cyan);margin-bottom:2px}.flow-step .sd{font-size:10px;color:var(--mute)}.flow-arrow{color:var(--cyan);font-size:16px;padding:0 6px;flex-shrink:0}
+.highlight-box{background:rgba(0,240,255,0.06);border-left:3px solid var(--cyan);padding:14px 18px;border-radius:0 8px 8px 0;margin:16px 0;font-size:13px}
+.code-block{background:#0c1229;border:1px solid var(--bdr);border-radius:8px;padding:16px;font-family:var(--fm);font-size:12px;color:#b8d4e3;overflow-x:auto;margin:12px 0;line-height:1.6}
+.innovation-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin:20px 0}
+.inno-card{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:24px;position:relative;overflow:hidden;transition:all .3s}.inno-card:hover{border-color:var(--cyan);box-shadow:0 0 30px rgba(0,240,255,0.1);transform:translateY(-3px)}.inno-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--cyan),var(--green))}.inno-num{font-size:36px;font-weight:800;color:rgba(0,240,255,0.15);position:absolute;top:12px;right:16px}.inno-card h4{font-size:15px;color:var(--cyan);margin-bottom:8px}.inno-card p{font-size:13px;color:var(--mute);line-height:1.6}
+.cnn-block{flex:1;background:rgba(0,240,255,0.08);border:1px solid var(--bdr);border-radius:6px;padding:10px 14px;text-align:center;font-size:12px}.cnn-block.conv{border-left:3px solid var(--cyan)}.cnn-block.dense{border-left:3px solid var(--purple)}.cnn-block.out{border-left:3px solid var(--amber)}.cnn-arr{color:var(--mute);font-size:16px;text-align:center;width:100%;max-width:600px}
+.power-diagram{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:20px 0}
+.pw-state{border-radius:10px;padding:16px 20px;text-align:center;min-width:140px}.pw-state.active{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3)}.pw-state.standby{background:rgba(255,170,0,0.1);border:1px solid rgba(255,170,0,0.3)}.pw-state.sleep{background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3)}.pw-state .sn{font-weight:700;font-size:14px;margin-bottom:4px}.pw-state .sc{font-size:11px;color:var(--mute)}.pw-state.active .sn{color:var(--green)}.pw-state.standby .sn{color:var(--amber)}.pw-state.sleep .sn{color:var(--purple)}.pw-arrow{color:var(--cyan);font-size:18px;flex-shrink:0}
+.cm table{border-collapse:collapse;font-size:12px}.cm th,.cm td{padding:8px 12px;text-align:center;border:1px solid rgba(0,240,255,0.1)}.cm th{background:rgba(0,240,255,0.1);color:var(--cyan);font-weight:600}.ch{background:rgba(0,240,255,0.25);color:#fff;font-weight:700}.cl{background:rgba(255,51,102,0.15);color:var(--red)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}.badge-pass{background:rgba(0,255,136,0.15);color:var(--green)}
+</style>
+</head>
+<body>
+<nav class="sidebar"><div class="sidebar-logo"><h2>心镜Pro</h2><div class="sub">HeartMirror Pro</div></div>
+<ul class="nav-list">
+<li class="nav-item active" onclick="showPage(0)">&#9673; 封面</li>
+<li class="nav-item" onclick="showPage(1)">&#9673; 项目概述</li>
+<li class="nav-item" onclick="showPage(2)">&#9673; 系统总体架构</li>
+<li class="nav-item" onclick="showPage(3)">&#9673; 硬件设计与迭代</li>
+<li class="nav-item" onclick="showPage(4)">&#9673; 嵌入式软件设计</li>
+<li class="nav-item" onclick="showPage(5)">&#9673; 心率血氧算法</li>
+<li class="nav-item" onclick="showPage(6)">&#9673; 心律失常检测(AI)</li>
+<li class="nav-item" onclick="showPage(7)">&#9673; 跌倒检测算法</li>
+<li class="nav-item" onclick="showPage(8)">&#9673; 模型训练与评估</li>
+<li class="nav-item" onclick="showPage(9)">&#9673; 物联网通信</li>
+<li class="nav-item" onclick="showPage(10)">&#9673; 微信小程序</li>
+<li class="nav-item" onclick="showPage(11)">&#9673; 低功耗设计</li>
+<li class="nav-item" onclick="showPage(12)">&#9673; 系统测试</li>
+<li class="nav-item" onclick="showPage(13)">&#9673; 创新点总结</li>
+<li class="nav-item" onclick="showPage(14)">&#9673; 总结与展望</li>
+</ul></nav>
+<div class="main">
+
+<div class="page cover active" id="p0"><canvas id="ecgCanvas"></canvas><div class="cover-content">
+<h1>面向心律失常高风险独居老人的<br>可穿戴多体征监护系统</h1>
+<div class="subtitle">心 镜 Pro &nbsp;|&nbsp; HeartMirror Pro</div><div class="divider"></div>
+<div class="meta"><strong>武汉理工大学</strong> · 本科毕业设计<br>设计者：<strong>张元杰</strong><br><span style="color:var(--cyan)">心如明镜 · 健康可见</span></div>
+<div style="margin-top:30px"><span class="tag tag-c">ESP32-S3</span><span class="tag tag-g">TFLite Micro</span><span class="tag tag-p">1D-CNN</span><span class="tag tag-a">OneNET</span><span class="tag tag-r">FreeRTOS</span></div>
+</div></div>
+
+<div class="page" id="p1"><h1>项目概述</h1>
+<h2>1.1 研究背景</h2><div class="card"><p>随着人口老龄化加剧和生活方式改变，<strong>心血管疾病</strong>已成为影响中老年人群健康与生命安全的重要因素之一，其中<strong>心律失常</strong>的发病率和致死率持续攀升。大量流行病学研究表明，心房颤动等心律失常不仅会导致心悸、胸闷等不适症状，还会显著增加卒中、心力衰竭甚至心源性猝死的风险。</p><p>对于<strong>独居且患有心律失常的高龄老人</strong>而言，传统院内心电图检查由于时间短、场景受限，难以捕捉日常生活中阵发性、一过性的心律失常事件，往往导致漏诊或延误诊治。此外，老年人在居家生活中还面临跌倒等意外伤害的风险。因此，如何实现连续监测与异常预警，已成为智慧养老领域的关键课题。</p></div>
+<div class="stats-grid"><div class="stat-card"><div class="stat-value">2亿+</div><div class="stat-label">中国65岁以上老年人口</div></div><div class="stat-card"><div class="stat-value">5×</div><div class="stat-label">房颤增加卒中风险倍数</div></div><div class="stat-card"><div class="stat-value">85%+</div><div class="stat-label">可穿戴设备房颤检测灵敏度</div></div><div class="stat-card"><div class="stat-value">90%+</div><div class="stat-label">跌倒检测识别率</div></div></div>
+<h2>1.2 研究意义</h2><div class="two-col"><div class="card"><h3>理论意义</h3><p>将柔性电子、多传感器融合、边缘计算与云平台相结合，探索佩戴舒适性和测量准确性之间取得平衡的设计方法。</p></div><div class="card"><h3>技术意义</h3><p>基于ESP32-S3平台，实现TFLite Micro深度学习模型在嵌入式端的部署，探索"AI+仪器"的边缘计算范式。</p></div></div>
+<div class="card"><h3>应用意义</h3><p>有助于提高独居心律失常老人的居家安全感和生活质量，为子女和照护者提供可靠的远程监护手段，形成"监测—分析—预警—通知"的完整闭环。</p></div>
+<h2>1.3 国内外研究现状</h2><div class="card"><table class="dt"><thead><tr><th>研究方向</th><th>现状水平</th><th>代表技术</th><th>本系统方案</th></tr></thead><tbody><tr><td>心律失常检测</td><td>灵敏度 &gt;85%</td><td>PPG/ECG + AI</td><td>PPG + 1D-CNN + TFLite Micro</td></tr><tr><td>跌倒检测</td><td>识别率 &gt;90%</td><td>加速度计 + ML</td><td>MPU6050 + 阈值 + ISR</td></tr><tr><td>多体征融合</td><td>HR/SpO2/Temp/GPS</td><td>多传感器 + 云</td><td>MAX30102 + DS18B20 + OneNET</td></tr><tr><td>穿戴舒适性</td><td>硬质→柔性演进</td><td>FPC柔性电路</td><td>5cm×3cm×0.2mm 肌贴式</td></tr></tbody></table></div>
+</div>
+
+<div class="page" id="p2"><h1>系统总体架构</h1>
+<h2>2.1 三层架构</h2><div style="display:flex;flex-direction:column;gap:12px;margin:20px 0">
+<div class="arch-row"><div class="arch-box p" style="flex:2"><div class="lb">感知层 · Perception</div><div class="vl">传感器阵列</div></div><div class="arch-arrow">&rarr;</div><div class="arch-box p" style="flex:2"><div class="lb">处理层 · Processing</div><div class="vl">ESP32-S3 + FreeRTOS</div></div><div class="arch-arrow">&rarr;</div><div class="arch-box p" style="flex:2"><div class="lb">应用层 · Application</div><div class="vl">OneNET + 微信小程序</div></div></div>
+<div class="arch-row"><div class="arch-box" style="border-color:var(--green)"><div class="lb">MAX30102</div><div class="vl">心率血氧</div><div class="lb">I2C · 100Hz</div></div><div class="arch-box" style="border-color:var(--green)"><div class="lb">MPU6050</div><div class="vl">六轴姿态</div><div class="lb">I2C · 10Hz</div></div><div class="arch-box" style="border-color:var(--green)"><div class="lb">DS18B20</div><div class="vl">体温</div><div class="lb">1-Wire · 1Hz</div></div><div class="arch-box" style="border-color:var(--green)"><div class="lb">GPS模块</div><div class="vl">定位</div><div class="lb">UART · 1Hz</div></div></div></div>
+<h2>2.2 硬件选型</h2><div class="card"><table class="dt"><thead><tr><th>芯片/模块</th><th>型号</th><th>核心功能</th><th>通信接口</th><th>工作电压</th></tr></thead><tbody><tr><td><strong>主控</strong></td><td>ESP32-S3-WROOM-1</td><td>Xtensa LX7 双核 240MHz</td><td>WiFi / BLE 5.0</td><td>3.0-3.6V</td></tr><tr><td><strong>心率血氧</strong></td><td>MAX30102</td><td>PPG光电容积脉搏波, 18位ADC</td><td>I2C (0x57)</td><td>1.8-3.3V</td></tr><tr><td><strong>姿态传感器</strong></td><td>MPU6050</td><td>三轴加速度 + 三轴陀螺仪</td><td>I2C (0x68)</td><td>2.4-3.5V</td></tr><tr><td><strong>温度传感器</strong></td><td>DS18B20</td><td>12位精度数字温度</td><td>1-Wire</td><td>3.0-5.5V</td></tr><tr><td><strong>定位模块</strong></td><td>DX-GP10-A</td><td>GPS + 北斗双模定位</td><td>UART 9600bps</td><td>3.3V</td></tr><tr><td><strong>显示屏</strong></td><td>SSD1306</td><td>0.96寸 128×64 OLED</td><td>I2C (0x3C)</td><td>3.3-5.0V</td></tr></tbody></table></div>
+<h2>2.3 技术路线</h2><div class="flow-steps"><div class="flow-step"><div class="st">数据准备</div><div class="sd">MIT-BIH · 360→100Hz</div></div><div class="flow-arrow">&rarr;</div><div class="flow-step"><div class="st">模型训练</div><div class="sd">1D-CNN · 80 epochs</div></div><div class="flow-arrow">&rarr;</div><div class="flow-step"><div class="st">模型优化</div><div class="sd">INT8量化 · 29.41KB</div></div><div class="flow-arrow">&rarr;</div><div class="flow-step"><div class="st">端侧部署</div><div class="sd">TFLite Micro</div></div><div class="flow-arrow">&rarr;</div><div class="flow-step"><div class="st">云端通信</div><div class="sd">MQTT · OneNET</div></div><div class="flow-arrow">&rarr;</div><div class="flow-step"><div class="st">应用展示</div><div class="sd">微信小程序</div></div></div>
+</div>
+
+<div class="page" id="p3"><h1>硬件设计与迭代演进</h1>
+<h2>3.1 四代PCB迭代历程</h2><p>前后设计了<strong>8块PCB</strong>，打样总计<strong>100块</strong>，历经四代迭代：</p>
+<div class="timeline">
+<div class="tl-item"><div class="tl-title">第一代 — 背带式硬板</div><div class="tl-spec">10cm×10cm×1.2mm 刚性PCB + 模块化元件 + 50g 18650电池</div><div class="tl-detail"><span class="tag tag-c">穿戴：胸带式</span><span class="tag tag-r">缺点：重、测量不准</span></div></div>
+<div class="tl-item"><div class="tl-title">第二代 — 臂戴式硬板</div><div class="tl-spec">7cm×7cm×1mm 刚性PCB + 模块化元件 + 25g 18650电池</div><div class="tl-detail"><span class="tag tag-g">改进：缩小PCB、优化I2C</span><span class="tag tag-c">穿戴：臂戴式</span><span class="tag tag-r">缺点：仍重、不稳</span></div></div>
+<div class="tl-item"><div class="tl-title">第三代 — 子母式FPC</div><div class="tl-spec">母板5cm×5cm + 子板3cm×3cm × 1mm，FPC软排线 + 贴片元件</div><div class="tl-detail"><span class="tag tag-g">突破：子母结构、贴片减重、指戴提升精度</span><span class="tag tag-c">穿戴：腕戴+指戴</span><span class="tag tag-r">缺点：FPC I2C不稳</span></div></div>
+<div class="tl-item" style="border-color:var(--green);box-shadow:0 0 20px rgba(0,255,136,0.1)"><div class="tl-title" style="color:var(--green)">第四代 (最终版) — FPC肌贴式</div><div class="tl-spec">5cm×3cm×0.2mm FPC柔性电路 + 全贴片 + 350mAh锂聚合物电池</div><div class="tl-detail"><span class="tag tag-g">极致轻薄</span><span class="tag tag-g">近乎无感的肌贴式佩戴</span><span class="tag tag-a">小电池通过低功耗策略弥补</span></div></div></div>
+<h2>3.2 引脚分配</h2><div class="two-col">
+<div class="card"><h3>I2C 总线分配</h3><table class="dt"><thead><tr><th>总线</th><th>SCL</th><th>SDA</th><th>外设</th></tr></thead><tbody><tr><td>Bus A</td><td>GPIO12</td><td>GPIO13</td><td>MAX30102</td></tr><tr><td>Bus B</td><td>GPIO8</td><td>GPIO9</td><td>OLED + MPU6050</td></tr></tbody></table></div>
+<div class="card"><h3>其他接口</h3><table class="dt"><thead><tr><th>功能</th><th>GPIO</th><th>说明</th></tr></thead><tbody><tr><td>GPS UART</td><td>GPIO1/2</td><td>9600bps</td></tr><tr><td>DS18B20</td><td>GPIO3</td><td>1-Wire</td></tr><tr><td>KEY1/2/3</td><td>GPIO4/5/6</td><td>上/下/解除</td></tr><tr><td>SOS</td><td>GPIO38</td><td>中断触发</td></tr><tr><td>LED红/绿</td><td>GPIO7/15</td><td>指示灯</td></tr><tr><td>蜂鸣器</td><td>GPIO16</td><td>声音报警</td></tr></tbody></table></div></div>
+<div class="highlight-box"><strong>设计亮点：</strong>两条独立I2C总线避免OLED与MPU6050共用冲突，MAX30102独占总线确保100Hz采样稳定性。FPC采用聚酰亚胺基材，线宽线距0.1mm，最小弯曲半径5mm。</div></div>
+
+<div class="page" id="p4"><h1>嵌入式软件设计</h1>
+<h2>4.1 FreeRTOS 双核任务架构</h2><p>基于 <strong>ESP-IDF v5.4</strong> + <strong>FreeRTOS</strong>，充分利用ESP32-S3双核：</p>
+<div class="two-col"><div class="card" style="border-color:rgba(0,240,255,0.3)"><h3>Core 1 — 实时/计算密集</h3><table class="dt"><thead><tr><th>任务</th><th>优先级</th><th>频率</th><th>功能</th></tr></thead><tbody><tr><td>task_max30102</td><td>8</td><td>100Hz</td><td>心率血氧+TFLite推理</td></tr><tr><td>task_mpu6050</td><td>7</td><td>10Hz</td><td>姿态+跌倒检测</td></tr></tbody></table></div>
+<div class="card" style="border-color:rgba(0,255,136,0.3)"><h3>Core 0 — 控制/显示/通信</h3><table class="dt"><thead><tr><th>任务</th><th>优先级</th><th>频率</th><th>功能</th></tr></thead><tbody><tr><td>task_sos</td><td><strong>15</strong></td><td>中断</td><td>紧急报警(最高)</td></tr><tr><td>task_oled</td><td>5</td><td>10fps</td><td>OLED显示</td></tr><tr><td>task_key</td><td>5</td><td>20Hz</td><td>按键处理</td></tr><tr><td>task_ds18b20</td><td>4</td><td>1Hz</td><td>体温采集</td></tr><tr><td>task_onenet</td><td>4</td><td>20/1Hz</td><td>MQTT上报</td></tr><tr><td>task_gps</td><td>3</td><td>50Hz</td><td>NMEA解析</td></tr></tbody></table></div></div>
+<h2>4.2 软件分层架构</h2><div style="display:flex;flex-direction:column;gap:8px;margin:20px 0">
+<div class="arch-box p" style="border-color:var(--cyan)"><div class="lb">应用层</div><div class="vl">main.c · 任务调度 · 数据管理 · UI逻辑</div></div><div style="text-align:center;color:var(--mute)">&#9660;</div>
+<div class="arch-box" style="border-color:var(--green)"><div class="lb">算法层</div><div class="vl">Maxim心率血氧 · TFLite心律失常 · 跌倒检测 · 卡尔曼滤波</div></div><div style="text-align:center;color:var(--mute)">&#9660;</div>
+<div class="arch-box" style="border-color:var(--amber)"><div class="lb">驱动层</div><div class="vl">MAX30102 · MPU6050 · DS18B20 · GPS · OLED · WiFi · GPIO</div></div><div style="text-align:center;color:var(--mute)">&#9660;</div>
+<div class="arch-box" style="border-color:var(--purple)"><div class="lb">系统层</div><div class="vl">ESP-IDF v5.4 · FreeRTOS · NVS · 电源管理</div></div></div>
+<h2>4.3 线程安全</h2><div class="card"><ul style="padding-left:20px;color:var(--mute);font-size:14px;line-height:2"><li><code style="color:var(--cyan)">g_data_mutex</code> — 保护全局数据 g_sys_data</li><li><code style="color:var(--cyan)">g_i2c_bus_b_mutex</code> — 保护I2C Bus B (OLED+MPU6050)</li></ul></div>
+</div>
+
+<div class="page" id="p5"><h1>心率血氧检测算法</h1>
+<h2>5.1 Maxim 算法流程</h2><div class="flow-steps" style="flex-wrap:wrap"><div class="flow-step"><div class="st">去直流</div><div class="sd">减IR均值</div></div><div class="flow-arrow">&rarr;</div><div class="flow-step"><div class="st">移动平均</div><div class="sd">4点MA</div></div><div class="flow-arrow">&rarr;</div><div class="flow-step"><div class="st">一阶差分</div><div class="sd">突出斜率</div></div><div class="flow-arrow">&rarr;</div><div class="flow-step"><div class="st">汉明窗</div><div class="sd">带通滤波</div></div><div class="flow-arrow">&rarr;</div><div class="flow-step"><div class="st">峰值检测</div><div class="sd">自适应阈值</div></div><div class="flow-arrow">&rarr;</div><div class="flow-step"><div class="st">心率计算</div><div class="sd">HR=6000/avg</div></div></div>
+<h2>5.2 血氧计算</h2><div class="card"><div class="highlight-box"><strong>公式：</strong>R = (AC_red/DC_red) / (AC_ir/DC_ir)，通过SpO2查找表获取血氧值。R值与血氧饱和度呈负相关。</div></div>
+<h2>5.3 卡尔曼滤波优化</h2><div class="card"><div class="two-col"><div><h3>滤波参数</h3><table class="dt"><thead><tr><th>参数</th><th>值</th><th>含义</th></tr></thead><tbody><tr><td>Q (过程噪声)</td><td>0.01</td><td>模型不确定性</td></tr><tr><td>R (测量噪声)</td><td>10.0</td><td>传感器误差</td></tr></tbody></table></div><div><h3>突变抑制</h3><table class="dt"><thead><tr><th>|ΔHR|</th><th>增益调整</th></tr></thead><tbody><tr><td>&gt; 20 bpm</td><td>× 0.1 强抑制</td></tr><tr><td>&gt; 10 bpm</td><td>× 0.3 中抑制</td></tr><tr><td>≤ 10 bpm</td><td>正常跟踪</td></tr></tbody></table></div></div></div>
+<div class="stats-grid"><div class="stat-card"><div class="stat-value">&plusmn;2</div><div class="stat-label">心率精度 (bpm)</div></div><div class="stat-card"><div class="stat-value">&plusmn;2%</div><div class="stat-label">血氧精度</div></div><div class="stat-card"><div class="stat-value">0.5s</div><div class="stat-label">更新周期</div></div><div class="stat-card"><div class="stat-value">100Hz</div><div class="stat-label">采样频率</div></div></div>
+</div>
+
+<div class="page" id="p6"><h1>心律失常检测 — 深度学习</h1>
+<h2>6.1 MIT-BIH 数据集</h2><div class="card"><p>MIT-BIH心律失常数据库是国际公认的<strong>基准数据集</strong>，收录于PhysioNet，被超过1000篇论文引用。</p><div class="stats-grid"><div class="stat-card"><div class="stat-value">48</div><div class="stat-label">记录总数</div></div><div class="stat-card"><div class="stat-value">24h</div><div class="stat-label">总时长</div></div><div class="stat-card"><div class="stat-value">110K+</div><div class="stat-label">心搏总数</div></div><div class="stat-card"><div class="stat-value">360Hz</div><div class="stat-label">采样率</div></div></div></div>
+<h2>6.2 数据预处理</h2><div class="flow-steps"><div class="flow-step"><div class="st">重采样</div><div class="sd">360→100Hz</div></div><div class="flow-arrow">&rarr;</div><div class="flow-step"><div class="st">窗口分割</div><div class="sd">400样本·4秒</div></div><div class="flow-arrow">&rarr;</div><div class="flow-step"><div class="st">ECG→PPG</div><div class="sd">IR+Red双通道</div></div><div class="flow-arrow">&rarr;</div><div class="flow-step"><div class="st">标签映射</div><div class="sd">15→6类</div></div><div class="flow-arrow">&rarr;</div><div class="flow-step"><div class="st">数据集</div><div class="sd">(22030,400,2)</div></div></div>
+<h3>标签映射</h3><div class="card"><table class="dt"><thead><tr><th>类别</th><th>名称</th><th>判定依据</th></tr></thead><tbody><tr><td>0</td><td>NORMAL</td><td>正常窦性心律</td></tr><tr><td>1</td><td>TACHYCARDIA</td><td>心率 &gt; 100 bpm</td></tr><tr><td>2</td><td>BRADYCARDIA</td><td>心率 &lt; 60 bpm</td></tr><tr><td>3</td><td>ARRHYTHMIA</td><td>SDNN &gt; 50ms</td></tr><tr><td>4</td><td>PREMATURE</td><td>室性/房性早搏</td></tr><tr><td>5</td><td>PAUSE</td><td>RR间期 &gt; 1.5s</td></tr></tbody></table></div>
+<h2>6.3 1D-CNN 模型</h2><p>总参数仅<strong>~16,400</strong>，针对ESP32-S3资源约束设计：</p>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin:20px 0">
+<div class="cnn-block conv" style="max-width:600px"><strong>Input</strong> (400,2) — 4秒×IR/Red双通道</div><div class="cnn-arr">&#9660;</div>
+<div class="cnn-block conv" style="max-width:600px"><strong>Conv1D</strong> 16, k=5 + <strong>MaxPool</strong> 4 → (100,16)</div><div class="cnn-arr">&#9660;</div>
+<div class="cnn-block conv" style="max-width:600px"><strong>Conv1D</strong> 32, k=5 + <strong>MaxPool</strong> 4 → (25,32)</div><div class="cnn-arr">&#9660;</div>
+<div class="cnn-block conv" style="max-width:600px"><strong>Conv1D</strong> 64, k=3 + <strong>MaxPool</strong> 4 → (6,64)</div><div class="cnn-arr">&#9660;</div>
+<div class="cnn-block conv" style="max-width:600px"><strong>Conv1D</strong> 32, k=3 + <strong>GlobalAvgPool</strong> → (32,)</div><div class="cnn-arr">&#9660;</div>
+<div class="cnn-block dense" style="max-width:600px"><strong>Dense</strong> 32, ReLU + <strong>Dropout</strong> 0.3</div><div class="cnn-arr">&#9660;</div>
+<div class="cnn-block out" style="max-width:600px"><strong>Output</strong> Dense 6, Softmax → 6种心律失常概率</div></div>
+<h2>6.4 INT8 量化</h2><div class="two-col"><div class="card"><h3>量化效果</h3><table class="dt"><thead><tr><th>指标</th><th>Float32</th><th>INT8</th></tr></thead><tbody><tr><td>模型大小</td><td>89 KB</td><td><strong>29.41 KB</strong></td></tr><tr><td>推理速度</td><td>基准</td><td>2-3倍提升</td></tr><tr><td>准确率</td><td>83.45%</td><td>&gt;82.5% (损失&lt;1%)</td></tr></tbody></table></div><div class="card"><h3>量化公式</h3><div class="code-block">q = round(r / S) + Z<br>r = (q - Z) * S<br><span style="color:#5a6a7a">// S: scale, Z: zero_point</span></div></div></div>
+</div>
+
+<div class="page" id="p7"><h1>跌倒检测算法</h1>
+<h2>7.1 三重判定策略</h2>
+<div style="display:flex;flex-direction:column;gap:8px;margin:20px 0">
+<div class="arch-box p"><div class="lb">Step 1</div><div class="vl">加速度采集 — 10Hz · 三轴</div></div><div style="text-align:center;color:var(--mute)">&#9660;</div>
+<div class="arch-box" style="border-color:var(--amber)"><div class="lb">Step 2</div><div class="vl">冲击检测 — a = √(ax²+ay²+az²) &gt; <strong>2.5g</strong></div></div><div style="text-align:center;color:var(--mute)">&#9660;</div>
+<div class="arch-box" style="border-color:var(--amber)"><div class="lb">Step 3</div><div class="vl">静止检测 — Δa &lt; 0.2g 持续 &gt; <strong>1秒</strong></div></div><div style="text-align:center;color:var(--mute)">&#9660;</div>
+<div class="arch-box" style="border-color:var(--red)"><div class="lb">Step 4</div><div class="vl">姿态变化 — 角度 &gt; <strong>45°</strong> / 0.5s</div></div><div style="text-align:center;color:var(--mute)">&#9660;</div>
+<div class="arch-box p" style="border-color:var(--red);box-shadow:0 0 20px rgba(255,51,102,0.2)"><div class="lb">综合判定</div><div class="vl" style="color:var(--red)">冲击 + 静止 + 姿态变化 = 跌倒！</div><div class="lb">LED闪烁 + 蜂鸣器 + 云端推送</div></div></div>
+<h2>7.2 报警机制</h2><div class="card"><table class="dt"><thead><tr><th>类型</th><th>触发</th><th>响应</th><th>延迟</th></tr></thead><tbody><tr><td><span class="tag tag-r">跌倒</span></td><td>MPU6050检测</td><td>声光+云端</td><td>&lt;100ms</td></tr><tr><td><span class="tag tag-r">SOS</span></td><td>GPIO38中断</td><td>声光+云端</td><td>实时ISR</td></tr><tr><td><span class="tag tag-g">解除</span></td><td>KEY3按下</td><td>停止报警</td><td>-</td></tr></tbody></table></div>
+</div>
+
+<div class="page" id="p8"><h1>模型训练与评估</h1>
+<h2>8.1 训练配置</h2><div class="card"><table class="dt"><thead><tr><th>配置项</th><th>参数</th></tr></thead><tbody><tr><td>训练轮次</td><td>80 epochs</td></tr><tr><td>批次大小</td><td>32</td></tr><tr><td>验证集</td><td>20%</td></tr><tr><td>优化器</td><td>Adam (lr=0.001)</td></tr><tr><td>损失函数</td><td>Sparse Categorical Crossentropy</td></tr><tr><td>早停</td><td>patience=20</td></tr></tbody></table></div>
+<h2>8.2 总体性能</h2><div class="stats-grid"><div class="stat-card"><div class="stat-value">85.2%</div><div class="stat-label">训练准确率</div></div><div class="stat-card"><div class="stat-value" style="background:linear-gradient(135deg,#00f0ff,#ffaa00)">83.45%</div><div class="stat-label">验证准确率</div></div><div class="stat-card"><div class="stat-value">0.38</div><div class="stat-label">训练损失</div></div><div class="stat-card"><div class="stat-value">0.42</div><div class="stat-label">验证损失</div></div></div>
+<h2>8.3 各类别性能</h2><div class="card"><table class="dt"><thead><tr><th>类别</th><th>类型</th><th>Precision</th><th>Recall</th><th>F1</th><th>权重</th></tr></thead><tbody>
+<tr><td>0</td><td>NORMAL</td><td style="color:var(--green)">0.89</td><td style="color:var(--green)">0.92</td><td style="color:var(--green)">0.90</td><td>0.52</td></tr>
+<tr><td>1</td><td>TACHY</td><td>0.78</td><td>0.74</td><td>0.76</td><td>1.85</td></tr>
+<tr><td>2</td><td>BRADY</td><td>0.81</td><td>0.77</td><td>0.79</td><td>2.31</td></tr>
+<tr><td>3</td><td>ARRHY</td><td>0.76</td><td>0.72</td><td>0.74</td><td>1.67</td></tr>
+<tr><td>4</td><td>PREMAT</td><td>0.82</td><td>0.79</td><td>0.80</td><td>1.23</td></tr>
+<tr><td>5</td><td>PAUSE</td><td>0.71</td><td>0.68</td><td>0.69</td><td>3.45</td></tr></tbody></table></div>
+<h2>8.4 混淆矩阵</h2><div class="cm"><table><thead><tr><th></th><th>预:N</th><th>预:T</th><th>预:B</th><th>预:A</th><th>预:P</th><th>预:S</th></tr></thead><tbody>
+<tr><th>实:N</th><td class="ch">2051</td><td class="cl">42</td><td class="cl">18</td><td class="cl">23</td><td class="cl">12</td><td class="cl">4</td></tr>
+<tr><th>实:T</th><td class="cl">38</td><td class="ch">412</td><td class="cl">21</td><td class="cl">15</td><td class="cl">8</td><td class="cl">6</td></tr>
+<tr><th>实:B</th><td class="cl">22</td><td class="cl">18</td><td class="ch">358</td><td class="cl">12</td><td class="cl">10</td><td class="cl">5</td></tr>
+<tr><th>实:A</th><td class="cl">28</td><td class="cl">12</td><td class="cl">14</td><td class="ch">298</td><td class="cl">18</td><td class="cl">8</td></tr>
+<tr><th>实:P</th><td class="cl">18</td><td class="cl">10</td><td class="cl">8</td><td class="cl">22</td><td class="ch">482</td><td class="cl">5</td></tr>
+<tr><th>实:S</th><td class="cl">8</td><td class="cl">6</td><td class="cl">4</td><td class="cl">12</td><td class="cl">7</td><td class="ch">89</td></tr></tbody></table><p style="font-size:11px;color:var(--mute);margin-top:8px">N=正常 T=心动过速 B=心动过缓 A=心律不齐 P=早搏 S=漏搏</p></div></div>
+
+<div class="page" id="p9"><h1>物联网通信与云端</h1>
+<h2>9.1 OneNET 架构</h2><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;margin:20px 0">
+<div class="arch-box p"><div class="lb">设备端</div><div class="vl">ESP32-S3</div></div><div class="arch-arrow">&rarr;</div><div class="arch-box"><div class="lb">WiFi</div><div class="vl">路由器</div></div><div class="arch-arrow">&rarr;</div><div class="arch-box"><div class="lb">互联网</div><div class="vl">TCP/TLS</div></div><div class="arch-arrow">&rarr;</div><div class="arch-box p"><div class="lb">云平台</div><div class="vl">OneNET</div></div><div class="arch-arrow">&rarr;</div><div class="arch-box" style="border-color:var(--green)"><div class="lb">应用端</div><div class="vl">微信小程序</div></div></div>
+<h2>9.2 MQTT</h2><div class="two-col"><div class="card"><h3>连接参数</h3><table class="dt"><tbody><tr><td>服务器</td><td><code style="color:var(--cyan)">mqtt://mqtts.heclouds.com</code></td></tr><tr><td>端口</td><td>1883</td></tr><tr><td>设备ID</td><td>ESP32S3_0</td></tr><tr><td>产品ID</td><td>LQXosE0q3F</td></tr></tbody></table></div><div class="card"><h3>数据上报</h3><table class="dt"><thead><tr><th>数据</th><th>频率</th></tr></thead><tbody><tr><td>raw_ir</td><td><span class="tag tag-a">20Hz</span></td></tr><tr><td>HR/SpO2/Temp/HR_type/经纬度</td><td><span class="tag tag-c">1Hz</span></td></tr><tr><td>sos_fall/sos_key</td><td><span class="tag tag-r">事件触发</span></td></tr></tbody></table></div></div>
+</div>
+
+<div class="page" id="p10"><h1>微信小程序设计</h1>
+<div class="card"><p style="font-size:20px;text-align:center;color:var(--cyan);font-weight:700">心镜Pro — "心如明镜，健康可见"</p></div>
+<h2>10.1 功能模块</h2><div class="card"><table class="dt"><thead><tr><th>ID</th><th>模块</th><th>功能</th><th>核心技术</th></tr></thead><tbody>
+<tr><td>M1</td><td>实时体征</td><td>HR/SpO2/Temp显示</td><td>200ms轮询+变化检测</td></tr>
+<tr><td>M2</td><td>ECG波形</td><td>Canvas实时绘制</td><td>40fps动画</td></tr>
+<tr><td>M3</td><td>心律失常</td><td>6类型识别+记录</td><td>30秒合并策略</td></tr>
+<tr><td>M4</td><td>GPS定位</td><td>位置+信号强度</td><td>GPS/北斗</td></tr>
+<tr><td>M5</td><td>紧急报警</td><td>摔倒/SOS</td><td>弹窗+震动</td></tr>
+<tr><td>M6</td><td>设备状态</td><td>在线/离线</td><td>计数器防抖</td></tr></tbody></table></div>
+<h2>10.2 核心优化</h2><div class="two-col"><div class="card"><h3>数据变化检测</h3><table class="dt"><thead><tr><th>场景</th><th>优化前</th><th>优化后</th></tr></thead><tbody><tr><td>稳定时setData</td><td>5次/秒</td><td>0次/秒</td></tr><tr><td>波形流畅度</td><td>每3-5秒卡顿</td><td>40fps流畅</td></tr></tbody></table></div><div class="card"><h3>界面配色</h3><div style="display:flex;gap:10px;margin:10px 0"><div style="width:60px;height:40px;background:#050b14;border-radius:6px;border:1px solid #333;text-align:center;line-height:40px;font-size:10px;color:#888">#050b14</div><div style="width:60px;height:40px;background:#38bdf8;border-radius:6px;text-align:center;line-height:40px;font-size:10px;color:#000">#38bdf8</div><div style="width:60px;height:40px;background:#00f260;border-radius:6px;text-align:center;line-height:40px;font-size:10px;color:#000">#00f260</div><div style="width:60px;height:40px;background:#ff3366;border-radius:6px;text-align:center;line-height:40px;font-size:10px;color:#fff">#ff3366</div></div></div></div>
+</div>
+
+<div class="page" id="p11"><h1>低功耗设计</h1>
+<h2>11.1 功耗状态机</h2><div class="power-diagram">
+<div class="pw-state active"><div class="sn">活跃模式</div><div class="sc">~150mA<br>全功能运行</div></div><div class="pw-arrow">&rarr;<br><span style="font-size:10px;color:var(--mute)">无手指30s</span></div>
+<div class="pw-state standby"><div class="sn">待机模式</div><div class="sc">~30mA<br>OLED "STANDBY"</div></div><div class="pw-arrow">&rarr;<br><span style="font-size:10px;color:var(--mute)">无手指5min</span></div>
+<div class="pw-state sleep"><div class="sn">深度休眠</div><div class="sc">~10μA<br>仅SOS可唤醒</div></div></div>
+<h2>11.2 续航估算 (350mAh)</h2><div class="card"><table class="dt"><thead><tr><th>场景</th><th>优化前</th><th>优化后</th><th>提升</th></tr></thead><tbody><tr><td>持续测量</td><td>~2.3h</td><td>~2.3h</td><td>-</td></tr><tr><td>日常 (80%待机)</td><td>~2.3h</td><td><strong>~8h</strong></td><td>250%</td></tr><tr><td>夜间休眠</td><td>~2.3h</td><td><strong>~350h</strong></td><td>15000%</td></tr></tbody></table></div></div>
+
+<div class="page" id="p12"><h1>系统测试与性能</h1>
+<h2>12.1 功能测试</h2><div class="card"><table class="dt"><thead><tr><th>测试项</th><th>内容</th><th>结果</th></tr></thead><tbody><tr><td>数据显示</td><td>HR/SpO2/Temp实时更新</td><td><span class="badge badge-pass">通过</span></td></tr><tr><td>波形显示</td><td>ECG实时绘制</td><td><span class="badge badge-pass">通过</span></td></tr><tr><td>异常检测</td><td>心律失常识别</td><td><span class="badge badge-pass">通过</span></td></tr><tr><td>异常记录</td><td>记录存储合并</td><td><span class="badge badge-pass">通过</span></td></tr><tr><td>GPS定位</td><td>坐标+信号</td><td><span class="badge badge-pass">通过</span></td></tr><tr><td>紧急报警</td><td>摔倒/SOS</td><td><span class="badge badge-pass">通过</span></td></tr><tr><td>状态指示</td><td>在线/离线</td><td><span class="badge badge-pass">通过</span></td></tr></tbody></table></div>
+<h2>12.2 性能对比</h2><div class="two-col"><div class="card"><h3>小程序性能</h3><table class="dt"><thead><tr><th>指标</th><th>目标</th><th>实际</th></tr></thead><tbody><tr><td>帧率</td><td>≥30fps</td><td style="color:var(--green);font-weight:700">40fps</td></tr><tr><td>延迟</td><td>≤500ms</td><td style="color:var(--green);font-weight:700">200ms</td></tr><tr><td>内存</td><td>≤50MB</td><td style="color:var(--green);font-weight:700">~30MB</td></tr><tr><td>CPU</td><td>≤30%</td><td style="color:var(--green);font-weight:700">~15%</td></tr></tbody></table></div><div class="card"><h3>测量精度</h3><table class="dt"><thead><tr><th>参数</th><th>范围</th><th>精度</th></tr></thead><tbody><tr><td>心率</td><td>30-220bpm</td><td>±2bpm</td></tr><tr><td>血氧</td><td>70-100%</td><td>±2%</td></tr><tr><td>体温</td><td>-10~+85°C</td><td>±0.5°C</td></tr><tr><td>GPS</td><td>全球</td><td>&lt;2.5m CEP</td></tr></tbody></table></div></div>
+<h2>12.3 兼容性</h2><div class="card"><table class="dt"><thead><tr><th>平台</th><th>版本</th><th>结果</th></tr></thead><tbody><tr><td>iOS</td><td>15+ / 微信8.0+</td><td><span class="badge badge-pass">通过</span></td></tr><tr><td>Android</td><td>10+ / 微信8.0+</td><td><span class="badge badge-pass">通过</span></td></tr><tr><td>鸿蒙</td><td>微信8.0+</td><td><span class="badge badge-pass">通过</span></td></tr></tbody></table></div>
+</div>
+
+<div class="page" id="p13"><h1>创新点总结</h1>
+<div class="innovation-grid">
+<div class="inno-card"><div class="inno-num">01</div><h4>边缘AI心律失常检测</h4><p>首次在可穿戴设备上实现<strong>TFLite Micro</strong>的6类心律失常实时分类。INT8模型仅<strong>29.41KB</strong>，推理<strong>&lt;50ms</strong>，边缘计算无需云端。</p><div style="margin-top:8px"><span class="tag tag-c">TFLite Micro</span><span class="tag tag-p">1D-CNN</span><span class="tag tag-g">29.41KB</span></div></div>
+<div class="inno-card"><div class="inno-num">02</div><h4>FPC柔性电路极致穿戴</h4><p>4代迭代，8块板设计、100+块打样。从10cm硬板到<strong>5cm×3cm×0.2mm FPC肌贴式</strong>，近乎无感佩戴。</p><div style="margin-top:8px"><span class="tag tag-c">FPC柔性</span><span class="tag tag-g">肌贴式</span><span class="tag tag-a">100+打样</span></div></div>
+<div class="inno-card"><div class="inno-num">03</div><h4>多源数据融合</h4><p>PPG+加速度+温度+GPS多维融合。卡尔曼滤波+<strong>置信度阈值(30%)</strong>降低误报。</p><div style="margin-top:8px"><span class="tag tag-c">多源融合</span><span class="tag tag-g">卡尔曼</span></div></div>
+<div class="inno-card"><div class="inno-num">04</div><h4>分级功耗管理</h4><p>活跃/待机/休眠<strong>三级功耗</strong>，续航提升<strong>250%+</strong>，深度休眠仅<strong>~10μA</strong>。</p><div style="margin-top:8px"><span class="tag tag-p">三级功耗</span><span class="tag tag-g">10μA</span></div></div>
+<div class="inno-card"><div class="inno-num">05</div><h4>全栈闭环系统</h4><p>硬件→嵌入式→AI→云端→应用，<strong>"监测→分析→预警→通知"</strong>全链路闭环。</p><div style="margin-top:8px"><span class="tag tag-c">全栈</span><span class="tag tag-r">端到端</span></div></div>
+<div class="inno-card"><div class="inno-num">06</div><h4>数据变化检测优化</h4><p>小程序端创新实现变化检测，解决波形卡顿，实现<strong>40fps流畅渲染</strong>。</p><div style="margin-top:8px"><span class="tag tag-c">40fps</span><span class="tag tag-g">零卡顿</span></div></div>
+</div></div>
+
+<div class="page" id="p14"><h1>总结与展望</h1>
+<h2>项目总结</h2><div class="card"><table class="dt"><thead><tr><th>模块</th><th>核心成果</th><th>关键指标</th></tr></thead><tbody>
+<tr><td><strong>硬件</strong></td><td>4代FPC迭代，肌贴式</td><td>5cm×3cm×0.2mm</td></tr>
+<tr><td><strong>嵌入式</strong></td><td>FreeRTOS双核，7任务</td><td>100Hz采集 &lt;50ms推理</td></tr>
+<tr><td><strong>AI</strong></td><td>1D-CNN + TFLite Micro</td><td>83.45% · 29.41KB</td></tr>
+<tr><td><strong>云端</strong></td><td>OneNET MQTT</td><td>20Hz+1Hz</td></tr>
+<tr><td><strong>小程序</strong></td><td>ECG实时绘制</td><td>40fps · 200ms</td></tr>
+<tr><td><strong>功耗</strong></td><td>三级管理</td><td>休眠~10μA</td></tr></tbody></table></div>
+<h2>未来展望</h2><div class="innovation-grid"><div class="inno-card"><h4>历史趋势</h4><p>增加长期体征趋势图表，支持天/周/月查看，辅助健康评估。</p></div><div class="inno-card"><h4>多设备监控</h4><p>支持同时监控多位老人，适用于养老院和社区场景。</p></div><div class="inno-card"><h4>语音播报</h4><p>为视力不佳用户增加体征数据语音播报功能。</p></div><div class="inno-card"><h4>医疗对接</h4><p>对接远程诊断平台，打通"监护到诊疗"最后一公里。</p></div></div>
+<div style="text-align:center;margin-top:50px;padding:40px 0;border-top:1px solid var(--bdr)"><p style="font-size:24px;color:var(--cyan);font-weight:700;margin-bottom:10px">感谢聆听</p><p style="color:var(--mute)">武汉理工大学 · 本科毕业设计答辩 · 张元杰 · 心镜Pro · 2026</p></div>
+</div>
+
+</div>
+<script>
+function showPage(i){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.getElementById('p'+i).classList.add('active');document.querySelectorAll('.nav-item')[i].classList.add('active');window.scrollTo(0,0)}
+(function(){const c=document.getElementById('ecgCanvas');if(!c)return;const x=c.getContext('2d');let w,h;function rs(){w=c.width=c.parentElement.clientWidth;h=c.height=c.parentElement.clientHeight}rs();window.addEventListener('resize',rs);let ph=0;const pts=[];const mx=600;function ecg(t){const r=Math.exp(-Math.pow((t-Math.PI)/.35,2));const p=.15*Math.exp(-Math.pow((t-(Math.PI-1.2))/.5,2));const q=-.12*Math.exp(-Math.pow((t-(Math.PI-.3))/.12,2));const s=-.15*Math.exp(-Math.pow((t-(Math.PI+.3))/.15,2));const tw=.25*Math.exp(-Math.pow((t-(Math.PI+1.2))/.6,2));return p+q+r+s+tw}
+function draw(){x.clearRect(0,0,w,h);ph+=.06;const yb=h*.55,am=h*.25;pts.push(ecg(ph%(2*Math.PI)));if(pts.length>mx)pts.shift();x.beginPath();x.strokeStyle='#00f0ff';x.lineWidth=2;x.shadowColor='#00f0ff';x.shadowBlur=8;for(let i=0;i<pts.length;i++){const px=(i/mx)*w,py=yb-pts[i]*am;i===0?x.moveTo(px,py):x.lineTo(px,py)}x.stroke();const sx=(pts.length/mx)*w;x.beginPath();x.strokeStyle='rgba(0,240,255,0.3)';x.lineWidth=1;x.moveTo(sx,0);x.lineTo(sx,h);x.stroke();x.beginPath();x.arc(sx,yb-pts[pts.length-1]*am,4,0,Math.PI*2);x.fillStyle='#00f0ff';x.shadowBlur=15;x.fill();requestAnimationFrame(draw)}draw()})();
+document.addEventListener('keydown',function(e){const ps=document.querySelectorAll('.page');let c=-1;ps.forEach((p,i)=>{if(p.classList.contains('active'))c=i});if(e.key==='ArrowRight'&&c<ps.length-1)showPage(c+1);if(e.key==='ArrowLeft'&&c>0)showPage(c-1)});
+</script></body></html>
